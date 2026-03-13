@@ -1,0 +1,6 @@
+pyspark
+pandas
+
+
+cp ../weather_etl_pipeline/data/output/weather_monthly_summary.csv ./spark_weather_etl/data/raw/uk_weather_cleaned.csv
+to copy from week 2 to week5

@@ -1,0 +1,7 @@
+# src/config.py
+
+MINIO_ENDPOINT = "http://localhost:9000"
+MINIO_ACCESS_KEY = "minioadmin"
+MINIO_SECRET_KEY = "minioadmin"
+BUCKET_NAME = "weather-data-lake"
+PROCESSED_PREFIX = "processed/weather/"

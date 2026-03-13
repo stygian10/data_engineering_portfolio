@@ -1,0 +1,6 @@
+dash==2.15.0
+pandas
+pyarrow
+boto3
+minio
+python-dotenv

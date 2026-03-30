@@ -1,6 +1,5 @@
-dash==2.15.0
 pandas
-pyarrow
+plotly
+dash
 boto3
-minio
-python-dotenv
+pyarrow

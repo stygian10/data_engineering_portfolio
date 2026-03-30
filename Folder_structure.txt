@@ -1,0 +1,109 @@
+
+├── Folder_strcuture.txt
+├── logs
+├── readME.md
+├── requirements.txt
+├── venv
+│   ├── bin
+│   ├── etc
+│   │   └── jupyter
+│   ├── include
+│   ├── lib
+│   │   └── python3.9
+│   ├── pyvenv.cfg
+│   └── share
+│       ├── applications
+│       ├── icons
+│       ├── jupyter
+│       ├── man
+│       └── py4j
+├── w1_weather_data_cleaner
+│   ├── README.md
+│   ├── README_TEMPLATE.md
+│   ├── data
+│   │   ├── processed
+│   │   └── raw
+│   ├── figures
+│   │   ├── precip_bar_2024.png
+│   │   ├── temp_boxplot_season_city.png
+│   │   ├── temp_trend_edinburgh.png
+│   │   ├── temp_trend_london.png
+│   │   └── temp_trend_manchester.png
+│   └── notebooks
+│       ├── 01_fetch_clean_eda.ipynb
+│       ├── README_TEMPLATE.md
+│       ├── data
+│       ├── figures
+│       └── test.ipynb
+├── w2_weather_etl_pipeline
+│   ├── README.md
+│   ├── data
+│   │   ├── input
+│   │   └── output
+│   ├── docker
+│   └── scripts
+│       └── etl.py
+├── w3_PostgreSQLDataLoader
+│   ├── README.md
+│   ├── __pycache__
+│   │   ├── db_connect.cpython-311.pyc
+│   │   ├── db_connect.cpython-312.pyc
+│   │   └── db_connect.cpython-314.pyc
+│   ├── createtables.py
+│   ├── db_connect.py
+│   ├── load_data.py
+│   ├── python_exploration_28Jan.py
+│   └── sql
+│       └── eda_queries.sql
+├── w4_airflow_weather_pipeline
+│   ├── Dockerfile
+│   ├── README.md
+│   ├── dags
+│   │   ├── __pycache__
+│   │   ├── tasks
+│   │   └── weather_etl_dag.py
+│   ├── data
+│   │   ├── parquet
+│   │   ├── processed
+│   │   └── raw
+│   ├── docker-compose.yaml
+│   ├── logs
+│   │   ├── dag_id=weather_etl_pipeline
+│   │   ├── dag_id=weather_etl_pipeline_w5
+│   │   ├── dag_processor_manager
+│   │   └── scheduler
+│   ├── plugins
+│   ├── requirements.txt
+│   ├── scripts
+│   └── w5_spark_weather_etl
+├── w5_spark_weather_etl
+│   ├── README.md
+│   ├── data
+│   │   ├── processed
+│   │   └── raw
+│   ├── notebooks
+│   │   └── spark_etl_analysis.ipynb
+│   ├── requirements.txt
+│   ├── src
+│   │   ├── __pycache__
+│   │   ├── extract.py
+│   │   ├── load.py
+│   │   ├── main.py
+│   │   ├── spark_sql_analysis.py
+│   │   └── transform.py
+│   └── tests
+│       ├── __init__.py
+│       └── test_pyspark_vs_pandas_real.py.py
+└── w6_visualisation_dashboard
+    ├── Dockerfile
+    ├── README.md
+    ├── data
+    ├── requirements.txt
+    ├── scripts
+    │   └── upload_to_minio.py
+    └── src
+        ├── __pycache__
+        ├── app.py
+        └── test_data_access.py
+
+61 directories, 130 files

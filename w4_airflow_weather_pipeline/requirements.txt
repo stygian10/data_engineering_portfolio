@@ -1,0 +1,6 @@
+pandas
+requests
+psycopg2-binary
+pyspark
+plotly
+dash

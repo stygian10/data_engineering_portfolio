@@ -182,7 +182,7 @@ else:
     logger.info("No Week 4 CSV files found. Skipping validation.")
 
 # ==================================================
-# CLEAN SHUTDOWN
+# CLEAN SHUTDOWN 
 # ==================================================
 spark.stop()
 logger.info("Spark SQL analysis completed successfully.")

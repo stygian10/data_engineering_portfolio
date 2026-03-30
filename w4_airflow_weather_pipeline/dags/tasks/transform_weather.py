@@ -19,6 +19,12 @@ def transform_weather_data():
         raise FileNotFoundError("[TRANSFORM] No raw weather files found to process")
 
     for raw_file in raw_files:
+        # Skip files that have already been processed to avoid duplicate loads
+        processed_file = processed_dir / raw_file.name.replace("raw", "processed")
+        if processed_file.exists():
+            print(f"[TRANSFORM] Skipping already-processed file: {raw_file.name}")
+            continue
+
         try:
             df = pd.read_csv(raw_file)
 
@@ -28,14 +34,19 @@ def transform_weather_data():
             df.columns = [col.lower() for col in df.columns]  # lowercase columns
             df.dropna(inplace=True)  # remove rows with missing values
 
-            # Optional: filter unrealistic values
+            # Filter unrealistic values.
+            # FIX: column is now 'relative_humidity_2m' (matching the updated
+            # API parameter name in extract_weather.py).
             df = df[(df['temperature_2m'] > -50) & (df['temperature_2m'] < 60)]
-            df = df[(df['relativehumidity_2m'] >= 0) & (df['relativehumidity_2m'] <= 100)]
+            df = df[(df['relative_humidity_2m'] >= 0) & (df['relative_humidity_2m'] <= 100)]
+
+            # Drop extraction_time before saving — not needed in processed output
+            if 'extraction_time' in df.columns:
+                df.drop(columns=['extraction_time'], inplace=True)
 
             # -----------------------------
             # Save processed CSV
             # -----------------------------
-            processed_file = processed_dir / raw_file.name.replace("raw", "processed")
             df.to_csv(processed_file, index=False)
 
             print(f"[TRANSFORM {datetime.utcnow()}] Processed {raw_file.name}")

@@ -39,7 +39,9 @@ def extract_weather_data():
             "longitude": coords["longitude"],
             "hourly": [
                 "temperature_2m",
-                "relativehumidity_2m",
+                # FIX: Open-Meteo deprecated 'relativehumidity_2m'.
+                # The current correct parameter name is 'relative_humidity_2m'.
+                "relative_humidity_2m",
                 "windspeed_10m"
             ],
             "timezone": "UTC"

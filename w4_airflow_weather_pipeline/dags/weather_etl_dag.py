@@ -1,43 +1,36 @@
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.operators.bash import BashOperator
 
 from tasks.extract_weather import extract_weather_data
 from tasks.transform_weather import transform_weather_data
 from tasks.load_weather import load_weather_data
 from tasks.validate_weather import validate_weather_data
 
-# -----------------------------
-# DAG default arguments
-# -----------------------------
+
 default_args = {
     "owner": "portfolio_user",
     "retries": 1,
     "retry_delay": timedelta(minutes=5),
 }
 
-# -----------------------------
-# End pipeline task
-# -----------------------------
+
 def end_pipeline():
     print("[END] Weather ETL pipeline finished successfully")
 
-# -----------------------------
-# DAG Definition
-# -----------------------------
+
 with DAG(
     dag_id="weather_etl_pipeline",
     description="Portfolio-ready multi-city ETL pipeline for weather data",
     default_args=default_args,
-    start_date=datetime(2026, 2, 12),
+    start_date=datetime(2026, 3, 24),
     schedule="@daily",
     catchup=False,
-    tags=["portfolio", "etl", "weather", "airflow"],
+    tags=["portfolio", "etl", "weather"],
 ) as dag:
 
-    # -----------------------------
-    # PythonOperator Tasks
-    # -----------------------------
+   
     extract_task = PythonOperator(
         task_id="extract_weather_data",
         python_callable=extract_weather_data,
@@ -58,12 +51,39 @@ with DAG(
         python_callable=validate_weather_data,
     )
 
+    # ------------------------
+    # W5 Spark Task
+    # ------------------------
+    spark_task = BashOperator(
+        task_id="run_spark_etl",
+        bash_command="python /opt/airflow/w5/src/main.py",
+    )
+
+    # ------------------------
+    # W6 MinIO Upload Task (NEW)
+    # ------------------------
+    upload_to_minio_task = BashOperator(
+        task_id="upload_to_minio",
+        bash_command="python /opt/airflow/w6/scripts/upload_to_minio.py",
+    )
+
+    # ------------------------
+    # End Task
+    # ------------------------
     end_task = PythonOperator(
         task_id="end_pipeline",
         python_callable=end_pipeline,
     )
 
-# -----------------------------
-# Task Dependencies
-# -----------------------------
-extract_task >> transform_task >> load_task >> validate_task >> end_task
+    # ------------------------
+    # FINAL PIPELINE FLOW
+    # ------------------------
+    (
+        extract_task
+        >> transform_task
+        >> load_task
+        >> validate_task
+        >> spark_task
+        >> upload_to_minio_task
+        >> end_task
+    )

@@ -27,6 +27,12 @@ def validate_weather_data():
     # Row count per city
     cursor.execute("SELECT city, COUNT(*) FROM weather_data GROUP BY city;")
     rows_per_city = cursor.fetchall()
+
+    # FIX: guard against zero cities being returned (e.g. table was truncated
+    # but DAG ran validate before load committed)
+    if not rows_per_city:
+        raise ValueError("[VALIDATE] Validation failed: no city breakdown found")
+
     for city, count in rows_per_city:
         print(f"[VALIDATE] City: {city} | Rows: {count}")
         if count == 0:

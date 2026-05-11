@@ -181,3 +181,5 @@ cython_debug/
 .cursorindexingignore
 venv/
 .DS_Store
+*.crc
+*.tmp

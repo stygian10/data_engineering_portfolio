@@ -10,3 +10,4 @@ ipykernel
 matplotlib
 seaborn
 pyspark
+scikit-learn

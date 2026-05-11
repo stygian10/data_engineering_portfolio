@@ -1,10 +1,11 @@
-
-├── Folder_strcuture.txt
+.
+├── Folder_structure.txt
+├── README.md
 ├── logs
-├── readME.md
 ├── requirements.txt
 ├── venv
 │   ├── bin
+│   │ 
 │   ├── etc
 │   │   └── jupyter
 │   ├── include
@@ -74,8 +75,7 @@
 │   │   └── scheduler
 │   ├── plugins
 │   ├── requirements.txt
-│   ├── scripts
-│   └── w5_spark_weather_etl
+│   └── scripts
 ├── w5_spark_weather_etl
 │   ├── README.md
 │   ├── data
@@ -94,16 +94,24 @@
 │   └── tests
 │       ├── __init__.py
 │       └── test_pyspark_vs_pandas_real.py.py
-└── w6_visualisation_dashboard
-    ├── Dockerfile
-    ├── README.md
+├── w6_visualisation_dashboard
+│   ├── Dockerfile
+│   ├── README.md
+│   ├── data
+│   ├── requirements.txt
+│   ├── scripts
+│   │   └── upload_to_minio.py
+│   └── src
+│       ├── __pycache__
+│       ├── app.py
+│       └── test_data_access.py
+└── w7_feature_engineering
     ├── data
-    ├── requirements.txt
-    ├── scripts
-    │   └── upload_to_minio.py
+    │   ├── processed
+    │   └── raw
     └── src
-        ├── __pycache__
-        ├── app.py
-        └── test_data_access.py
+        ├── features.py
+        ├── load_data.py
+        └── pipeline.py
 
-61 directories, 130 files
+65 directories, 132 files

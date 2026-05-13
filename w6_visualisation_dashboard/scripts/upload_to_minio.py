@@ -64,5 +64,5 @@ for file in os.listdir(local_path):
         uploaded_count += 1
 
         print(f"Uploaded: {file}")
-
+        
 print(f"\nUploaded {uploaded_count} parquet files to MinIO")

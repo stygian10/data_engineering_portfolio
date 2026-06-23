@@ -85,7 +85,7 @@ def load_data(parquet_files):
 
 
 
-# STEP 3–7: EXPLORATION
+# STEP 3-7: EXPLORATION
 
 def explore_data(df):
 

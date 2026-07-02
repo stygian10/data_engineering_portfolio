@@ -12,6 +12,8 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
+import joblib
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
@@ -345,7 +347,14 @@ print("Saved: figures/residual_comparison.png")
 
 print("\nBest Model Selection")
 
+# Create models folder if it doesn't exist
+os.makedirs("models", exist_ok=True)
+
 if rf_metrics[2] > linear_metrics[2]:
+
+    best_model = rf_model
+    model_name = "Random Forest"
+    model_path = "models/random_forest_model.pkl"
 
     print("\nSelected Model: Random Forest")
 
@@ -358,11 +367,29 @@ if rf_metrics[2] > linear_metrics[2]:
 
 else:
 
+    best_model = linear_model
+    model_name = "Linear Regression"
+    model_path = "models/linear_regression_model.pkl"
+
     print("\nSelected Model: Linear Regression")
 
     print(
         f"R² remained higher at "
         f"{linear_metrics[2]:.2f}"
     )
+
+# -----------------------------------
+# Save Best Model
+# -----------------------------------
+
+joblib.dump(
+    best_model,
+    model_path
+)
+
+print(f"\nModel saved successfully.")
+
+print(f"Model Name : {model_name}")
+print(f"Model Path : {model_path}")
 
 print("\nModel comparison completed successfully.")

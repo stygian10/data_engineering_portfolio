@@ -7,7 +7,7 @@ End-to-end data engineering and ML pipeline built across 12 weeks.
 API → Airflow → Spark → MinIO → Dashboard → Feature Engineering → ML → API
 
 ## Projects
-|-------------------------------|
+
 | Week | Module                 |
 |------|----------------------- |
 | W1   | Data Cleaning          |

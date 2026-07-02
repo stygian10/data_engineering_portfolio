@@ -1,23 +1,7 @@
 .
 ├── Folder_structure.txt
 ├── README.md
-├── logs
 ├── requirements.txt
-├── venv
-│   ├── bin
-│   │ 
-│   ├── etc
-│   │   └── jupyter
-│   ├── include
-│   ├── lib
-│   │   └── python3.9
-│   ├── pyvenv.cfg
-│   └── share
-│       ├── applications
-│       ├── icons
-│       ├── jupyter
-│       ├── man
-│       └── py4j
 ├── w1_weather_data_cleaner
 │   ├── README.md
 │   ├── README_TEMPLATE.md
@@ -46,10 +30,6 @@
 │       └── etl.py
 ├── w3_PostgreSQLDataLoader
 │   ├── README.md
-│   ├── __pycache__
-│   │   ├── db_connect.cpython-311.pyc
-│   │   ├── db_connect.cpython-312.pyc
-│   │   └── db_connect.cpython-314.pyc
 │   ├── createtables.py
 │   ├── db_connect.py
 │   ├── load_data.py
@@ -60,7 +40,6 @@
 │   ├── Dockerfile
 │   ├── README.md
 │   ├── dags
-│   │   ├── __pycache__
 │   │   ├── tasks
 │   │   └── weather_etl_dag.py
 │   ├── data
@@ -68,12 +47,6 @@
 │   │   ├── processed
 │   │   └── raw
 │   ├── docker-compose.yaml
-│   ├── logs
-│   │   ├── dag_id=weather_etl_pipeline
-│   │   ├── dag_id=weather_etl_pipeline_w5
-│   │   ├── dag_processor_manager
-│   │   └── scheduler
-│   ├── plugins
 │   ├── requirements.txt
 │   └── scripts
 ├── w5_spark_weather_etl
@@ -85,7 +58,6 @@
 │   │   └── spark_etl_analysis.ipynb
 │   ├── requirements.txt
 │   ├── src
-│   │   ├── __pycache__
 │   │   ├── extract.py
 │   │   ├── load.py
 │   │   ├── main.py
@@ -102,16 +74,38 @@
 │   ├── scripts
 │   │   └── upload_to_minio.py
 │   └── src
-│       ├── __pycache__
 │       ├── app.py
 │       └── test_data_access.py
-└── w7_feature_engineering
+├── w7_feature_engineering
+│   ├── README.md
+│   ├── data
+│   │   ├── processed
+│   │   └── raw
+│   └── src
+│       ├── features.py
+│       ├── load_data.py
+│       └── pipeline.py
+└── w8_weather_prediction_model
+    ├── README.md
     ├── data
     │   ├── processed
     │   └── raw
+    ├── figures
+    │   ├── actual_vs_predicted.png
+    │   ├── feature_importance.png
+    │   ├── model_comparison.png
+    │   ├── residual_comparison.png
+    │   └── residual_distribution.png
+    ├── models
+    │   ├── baseline_linear_regression.pkl
+    │   └── random_forest_model.pkl
+    ├── notebooks
+    │   └── weather_model_baseline.ipynb
     └── src
-        ├── features.py
-        ├── load_data.py
-        └── pipeline.py
+        ├── compare_models.py
+        ├── config.py
+        ├── evaluate.py
+        ├── predict.py
+        └── train.py
 
-65 directories, 132 files
+49 directories, 60 files

@@ -10,25 +10,20 @@ def load_model():
     Returns
     -------
     BaseEstimator
-        Trained scikit-learn model.
+        Trained Scikit-learn model.
     """
 
-    # Check if model exists
-
+    # Check if the model exists
     if not MODEL_PATH.exists():
         raise FileNotFoundError(
             f"Model file not found:\n{MODEL_PATH}"
         )
 
-    # Load model
-
+    # Load the model
     model = joblib.load(MODEL_PATH)
 
-    # Confirmation
-
-    print("Model loaded successfully.")
+    # Confirmation message
+    print("\nModel loaded successfully.")
     print(f"Model path: {MODEL_PATH}")
 
     return model
-
-#test

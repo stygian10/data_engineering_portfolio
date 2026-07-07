@@ -34,6 +34,20 @@ PREDICTION_PARQUET = OUTPUT_DIR / "weather_predictions.parquet"
 
 PREDICTION_COLUMN = "predicted_temperature"
 
+# MinIO Configuration
+
+MINIO_ENDPOINT = "http://localhost:9000"
+
+MINIO_ACCESS_KEY = "minioadmin"
+
+MINIO_SECRET_KEY = "minioadmin"
+
+MINIO_BUCKET = "weather-data-lake"
+
+MINIO_SECURE = False
+
+MINIO_PREFIX = "predictions/"
+
 # Logging
 
 LOG_DIR = PROJECT_ROOT / "logs"

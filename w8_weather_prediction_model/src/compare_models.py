@@ -111,6 +111,7 @@ linear_predictions = linear_model.predict(
 
 print("Linear Regression Training Complete")
 
+
 # -----------------------------------
 # Train Random Forest
 # -----------------------------------

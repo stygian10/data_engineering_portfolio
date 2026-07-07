@@ -25,18 +25,7 @@ def load_features():
     # Display dataset information
     print("Feature dataset loaded successfully.")
     print(f"Dataset path: {FEATURE_DATA_PATH}")
-    print(f"Shape: {features_df.shape}")
-
-    # Display column names
-    print("\nColumns:")
-
-    for column in features_df.columns:
-        print(f"- {column}")
-
-    # Display missing values
-    print("\nMissing values:")
-
-    print(features_df.isnull().sum())
+    print(f"Rows: {len(features_df)}")
+    print(f"Columns: {len(features_df.columns)}")
 
     return features_df
-

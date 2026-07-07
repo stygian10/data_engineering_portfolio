@@ -1,6 +1,8 @@
 from load_model import load_model
 from load_features import load_features
 from predict import predict
+from save_predictions import save_predictions
+from upload_to_minio import upload_predictions
 
 
 def main():
@@ -23,10 +25,21 @@ def main():
 
     prediction_df = predict(model, features_df)
 
+    # Save prediction files
+    print("\nSaving prediction files...")
+
+    save_predictions(prediction_df)
+
+    # Uploading prediction files to Mini0 
+
+    print("\nUploading prediction files to MinIO...")
+
+    upload_predictions()
+
     # Display summary
     print("\nPrediction Summary")
 
-    print(f"Total predictions: {len(prediction_df)}")
+    print(f"Prediction Records: {len(prediction_df)}")
 
     # Display sample predictions
     print("\nFirst five predictions:")

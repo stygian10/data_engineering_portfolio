@@ -10,7 +10,7 @@ def predict(model, features_df):
     Parameters
     ----------
     model : BaseEstimator
-        Trained machine learning model.
+        Trained Scikit-learn model.
 
     features_df : pandas.DataFrame
         Engineered feature dataset.
@@ -32,6 +32,9 @@ def predict(model, features_df):
         ]
     )
 
+    # Convert all features to float64
+    X = X.astype("float64")
+
     # Generate predictions
     predictions = model.predict(X)
 
@@ -44,5 +47,3 @@ def predict(model, features_df):
     print(f"Prediction column: {PREDICTION_COLUMN}")
 
     return prediction_df
-
-    

@@ -85,27 +85,42 @@
 │       ├── features.py
 │       ├── load_data.py
 │       └── pipeline.py
-└── w8_weather_prediction_model
+├── w8_weather_prediction_model
+│   ├── README.md
+│   ├── data
+│   │   ├── processed
+│   │   └── raw
+│   ├── figures
+│   │   ├── actual_vs_predicted.png
+│   │   ├── feature_importance.png
+│   │   ├── model_comparison.png
+│   │   ├── residual_comparison.png
+│   │   └── residual_distribution.png
+│   ├── models
+│   │   ├── baseline_linear_regression.pkl
+│   │   ├── linear_regression_model.pkl
+│   │   └── random_forest_model.pkl
+│   ├── notebooks
+│   │   └── weather_model_baseline.ipynb
+│   └── src
+│       ├── compare_models.py
+│       ├── config.py
+│       ├── evaluate.py
+│       ├── predict.py
+│       └── train.py
+└── w9_ml_pipeline
     ├── README.md
     ├── data
-    │   ├── processed
-    │   └── raw
-    ├── figures
-    │   ├── actual_vs_predicted.png
-    │   ├── feature_importance.png
-    │   ├── model_comparison.png
-    │   ├── residual_comparison.png
-    │   └── residual_distribution.png
+    │   └── predictions
     ├── models
-    │   ├── baseline_linear_regression.pkl
     │   └── random_forest_model.pkl
-    ├── notebooks
-    │   └── weather_model_baseline.ipynb
     └── src
-        ├── compare_models.py
         ├── config.py
-        ├── evaluate.py
+        ├── load_features.py
+        ├── load_model.py
+        ├── main.py
         ├── predict.py
-        └── train.py
+        ├── save_predictions.py
+        └── upload_to_minio.py
 
-49 directories, 60 files
+54 directories, 70 files

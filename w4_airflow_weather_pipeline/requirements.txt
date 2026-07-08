@@ -4,3 +4,10 @@ psycopg2-binary
 pyspark
 plotly
 dash
+
+# Machine Learning
+scikit-learn
+joblib
+
+# MinIO / S3
+boto3

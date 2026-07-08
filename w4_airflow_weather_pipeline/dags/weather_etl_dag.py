@@ -60,11 +60,20 @@ with DAG(
     )
 
     # ------------------------
-    # W6 MinIO Upload Task (NEW)
+    # W6 MinIO Upload Task
     # ------------------------
     upload_to_minio_task = BashOperator(
         task_id="upload_to_minio",
         bash_command="python /opt/airflow/w6/scripts/upload_to_minio.py",
+    )
+
+    # ------------------------
+    # W7 Feature Engineering Task
+    # ------------------------
+
+    feature_engineering_task = BashOperator(
+        task_id="run_feature_engineering",
+        bash_command="python /opt/airflow/w7/src/pipeline.py",
     )
 
     # ------------------------
@@ -85,5 +94,6 @@ with DAG(
         >> validate_task
         >> spark_task
         >> upload_to_minio_task
+        >> feature_engineering_task
         >> end_task
     )

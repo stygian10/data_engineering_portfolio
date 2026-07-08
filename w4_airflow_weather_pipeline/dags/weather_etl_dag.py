@@ -73,7 +73,7 @@ with DAG(
 
     feature_engineering_task = BashOperator(
         task_id="run_feature_engineering",
-        bash_command="python /opt/airflow/w7/src/pipeline.py",
+        bash_command="python /opt/airflow/w7/src/main.py",
     )
 
     # ------------------------

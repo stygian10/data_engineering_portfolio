@@ -37,6 +37,8 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+
+      MINIO_ENDPOINT: http://minio:9000
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
@@ -44,6 +46,9 @@ services:
       - ./data:/opt/airflow/data
       - ../w5_spark_weather_etl:/opt/airflow/w5
       - ../w6_visualisation_dashboard:/opt/airflow/w6
+      - ../w7_feature_engineering:/opt/airflow/w7
+      - ../w8_weather_prediction_model:/opt/airflow/w8
+      - ../w9_ml_pipeline:/opt/airflow/w9
     ports:
       - "8080:8080"
     depends_on:
@@ -62,6 +67,8 @@ services:
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+
+      MINIO_ENDPOINT: http://minio:9000
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
@@ -69,6 +76,9 @@ services:
       - ./data:/opt/airflow/data
       - ../w5_spark_weather_etl:/opt/airflow/w5
       - ../w6_visualisation_dashboard:/opt/airflow/w6
+      - ../w7_feature_engineering:/opt/airflow/w7
+      - ../w8_weather_prediction_model:/opt/airflow/w8
+      - ../w9_ml_pipeline:/opt/airflow/w9
     depends_on:
       - postgres
       - minio

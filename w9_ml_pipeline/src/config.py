@@ -4,19 +4,39 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
+# Detect whether the project is running inside Airflow Docker
+
+AIRFLOW_ROOT = Path("/opt/airflow")
+
+if AIRFLOW_ROOT.exists():
+
+    PORTFOLIO_ROOT = AIRFLOW_ROOT
+
+    W7_FOLDER = "w7"
+    W8_FOLDER = "w8"
+
+else:
+
+    PORTFOLIO_ROOT = PROJECT_ROOT.parent
+
+    W7_FOLDER = "w7_feature_engineering"
+    W8_FOLDER = "w8_weather_prediction_model"
+
+# Input Paths
+
 # Input Paths
 
 FEATURE_DATA_PATH = (
-    PROJECT_ROOT.parent
-    / "w7_feature_engineering"
+    PORTFOLIO_ROOT
+    / W7_FOLDER
     / "data"
     / "processed"
     / "w7_features_final.parquet"
 )
 
 MODEL_PATH = (
-    PROJECT_ROOT.parent
-    / "w8_weather_prediction_model"
+    PORTFOLIO_ROOT
+    / W8_FOLDER
     / "models"
     / "linear_regression_model.pkl"
 )

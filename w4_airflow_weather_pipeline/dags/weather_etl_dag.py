@@ -107,7 +107,12 @@ Pipeline Stages
     prediction_pipeline_task = BashOperator(
         task_id="run_prediction_pipeline",
         bash_command="python /opt/airflow/w9/src/main.py",
-)
+    )
+
+    upload_prediction_to_minio_task = BashOperator(
+        task_id="upload_prediction_to_minio",
+        bash_command="python /opt/airflow/w9/src/upload_to_minio.py",   
+    )
 
     
     # End Task
@@ -130,5 +135,6 @@ Pipeline Stages
         >> feature_engineering_task
         >> model_training_task
         >> prediction_pipeline_task
+        >> upload_prediction_to_minio_task
         >> end_task
     )

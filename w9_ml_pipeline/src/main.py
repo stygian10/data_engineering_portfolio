@@ -2,7 +2,9 @@ from load_model import load_model
 from load_features import load_features
 from predict import predict
 from save_predictions import save_predictions
-from upload_to_minio import upload_predictions
+# from upload_to_minio import upload_predictions
+""" disabling the upload functions as there will be a seprate 
+upload function in the airflow for simplicity and and efficiancy"""
 
 
 def main():
@@ -32,9 +34,9 @@ def main():
 
     # Uploading prediction files to Mini0 
 
-    print("\nUploading prediction files to MinIO...")
+    #print("\nUploading prediction files to MinIO...")
 
-    upload_predictions()
+    #upload_predictions()
 
     # Display summary
     print("\nPrediction Summary")

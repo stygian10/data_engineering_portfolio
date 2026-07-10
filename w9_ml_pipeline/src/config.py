@@ -24,8 +24,6 @@ else:
 
 # Input Paths
 
-# Input Paths
-
 FEATURE_DATA_PATH = (
     PORTFOLIO_ROOT
     / W7_FOLDER
@@ -56,7 +54,7 @@ PREDICTION_COLUMN = "predicted_temperature"
 
 # MinIO Configuration
 
-MINIO_ENDPOINT = "http://localhost:9000"
+MINIO_ENDPOINT = "http://minio:9000"
 
 MINIO_ACCESS_KEY = "minioadmin"
 

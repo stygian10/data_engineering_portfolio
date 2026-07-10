@@ -12,7 +12,6 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
-import os
 import joblib
 
 from sklearn.model_selection import train_test_split
@@ -24,17 +23,22 @@ from sklearn.metrics import (
     mean_squared_error,
     r2_score
 )
+# Added a new configuration file that would defines the entire path in w8
 
 from config import (
     DATA_PATH,
     TARGET_COLUMN,
     RANDOM_STATE,
-    TEST_SIZE
+    TEST_SIZE,
+    MODEL_OUTPUT_DIR,
+    FIGURES_DIR,
+    MODEL_COMPARISON_FIGURE,
+    FEATURE_IMPORTANCE_FIGURE,
+    RESIDUAL_COMPARISON_FIGURE
 )
 
-# -----------------------------------
 # Load Dataset
-# -----------------------------------
+
 
 print("Loading dataset...")
 
@@ -50,9 +54,9 @@ print(df["date"].max())
 print("\nFirst 5 Rows:")
 print(df.head())
 
-# -----------------------------------
+
 # Prepare Features & Target
-# -----------------------------------
+
 
 print("\nPreparing dataset...")
 
@@ -73,9 +77,9 @@ print(X.shape)
 print("\nTarget Shape:")
 print(y.shape)
 
-# -----------------------------------
+
 # Train/Test Split
-# -----------------------------------
+
 
 X_train, X_test, y_train, y_test = train_test_split(
     X,
@@ -92,9 +96,9 @@ print("X_test Shape :", X_test.shape)
 print("y_train Shape:", y_train.shape)
 print("y_test Shape :", y_test.shape)
 
-# -----------------------------------
+
 # Train Linear Regression
-# -----------------------------------
+
 
 print("\nTraining Linear Regression Model...")
 
@@ -112,9 +116,9 @@ linear_predictions = linear_model.predict(
 print("Linear Regression Training Complete")
 
 
-# -----------------------------------
+
 # Train Random Forest
-# -----------------------------------
+
 
 print("\nTraining Random Forest Model...")
 
@@ -135,9 +139,9 @@ rf_predictions = rf_model.predict(
 
 print("Random Forest Training Complete")
 
-# -----------------------------------
+
 # Evaluation Function
-# -----------------------------------
+
 
 def evaluate_model(
     model_name,
@@ -172,9 +176,9 @@ def evaluate_model(
 
     return mae, rmse, r2
 
-# -----------------------------------
+
 # Evaluate Linear Regression
-# -----------------------------------
+
 
 linear_metrics = evaluate_model(
     "Linear Regression",
@@ -182,9 +186,9 @@ linear_metrics = evaluate_model(
     linear_predictions
 )
 
-# -----------------------------------
+
 # Evaluate Random Forest
-# -----------------------------------
+
 
 rf_metrics = evaluate_model(
     "Random Forest",
@@ -192,9 +196,9 @@ rf_metrics = evaluate_model(
     rf_predictions
 )
 
-# -----------------------------------
+
 # Model Comparison Table
-# -----------------------------------
+
 
 comparison_df = pd.DataFrame({
     "Model": [
@@ -218,9 +222,8 @@ comparison_df = pd.DataFrame({
 print("\nModel Comparison")
 print(comparison_df)
 
-# -----------------------------------
+
 # Save Model Comparison Plot
-# -----------------------------------
 
 plt.figure(figsize=(8, 6))
 
@@ -234,17 +237,18 @@ plt.title("Model Comparison")
 
 plt.tight_layout()
 
+# plot saving 
 plt.savefig(
-    "figures/model_comparison.png"
+    MODEL_COMPARISON_FIGURE,
+    dpi=300,
+    bbox_inches="tight"
 )
 
 plt.close()
 
-print("\nSaved: figures/model_comparison.png")
+print(f"\nSaved: {MODEL_COMPARISON_FIGURE}")
 
-# -----------------------------------
 # Feature Importance Analysis
-# -----------------------------------
 
 feature_importance = pd.DataFrame({
     "Feature": X.columns,
@@ -261,9 +265,7 @@ print(
     feature_importance.head(10)
 )
 
-# -----------------------------------
 # Save Feature Importance Plot
-# -----------------------------------
 
 top_features = feature_importance.head(10)
 
@@ -282,16 +284,18 @@ plt.gca().invert_yaxis()
 plt.tight_layout()
 
 plt.savefig(
-    "figures/feature_importance.png"
+    FEATURE_IMPORTANCE_FIGURE,
+    dpi=300,
+    bbox_inches="tight"
 )
 
 plt.close()
 
-print("Saved: figures/feature_importance.png")
+print(f"Saved: {FEATURE_IMPORTANCE_FIGURE}")
 
-# -----------------------------------
+
 # Residual Analysis
-# -----------------------------------
+
 
 linear_residuals = (
     y_test -
@@ -303,9 +307,7 @@ rf_residuals = (
     rf_predictions
 )
 
-# -----------------------------------
 # Save Residual Comparison Plot
-# -----------------------------------
 
 plt.figure(figsize=(8, 6))
 
@@ -335,27 +337,30 @@ plt.title(
 plt.tight_layout()
 
 plt.savefig(
-    "figures/residual_comparison.png"
+    RESIDUAL_COMPARISON_FIGURE,
+    dpi=300,
+    bbox_inches="tight"
 )
 
 plt.close()
 
-print("Saved: figures/residual_comparison.png")
+print(f"Saved: {RESIDUAL_COMPARISON_FIGURE}")
 
-# -----------------------------------
+
 # Select Best Model
-# -----------------------------------
 
 print("\nBest Model Selection")
 
 # Create models folder if it doesn't exist
-os.makedirs("models", exist_ok=True)
 
 if rf_metrics[2] > linear_metrics[2]:
 
     best_model = rf_model
     model_name = "Random Forest"
-    model_path = "models/random_forest_model.pkl"
+    model_path = (
+    MODEL_OUTPUT_DIR
+    / "random_forest_model.pkl"
+)
 
     print("\nSelected Model: Random Forest")
 
@@ -370,7 +375,10 @@ else:
 
     best_model = linear_model
     model_name = "Linear Regression"
-    model_path = "models/linear_regression_model.pkl"
+    model_path = (
+    MODEL_OUTPUT_DIR
+    / "linear_regression_model.pkl"
+)
 
     print("\nSelected Model: Linear Regression")
 
@@ -379,9 +387,9 @@ else:
         f"{linear_metrics[2]:.2f}"
     )
 
-# -----------------------------------
+
 # Save Best Model
-# -----------------------------------
+
 
 joblib.dump(
     best_model,

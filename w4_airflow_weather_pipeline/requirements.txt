@@ -13,4 +13,4 @@ joblib
 matplotlib
 
 # MinIO / S3
-boto3
+boto3 

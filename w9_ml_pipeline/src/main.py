@@ -2,6 +2,7 @@ from load_model import load_model
 from load_features import load_features
 from predict import predict
 from save_predictions import save_predictions
+from evaluate_predictions import evaluate_predictions
 # from upload_to_minio import upload_predictions
 """ disabling the upload functions as there will be a seprate 
 upload function in the airflow for simplicity and and efficiancy"""
@@ -9,7 +10,9 @@ upload function in the airflow for simplicity and and efficiancy"""
 
 def main():
     """
-    Execute the weather prediction inference pipeline.
+    Execute the complete machine learning inference pipeline,
+    including model loading, prediction generation,
+    prediction evaluation, and prediction file creation.
     """
 
     # Load the trained model
@@ -26,6 +29,13 @@ def main():
     print("\nGenerating predictions...")
 
     prediction_df = predict(model, features_df)
+
+    # Evaluate predictions
+    print("\nEvaluating predictions...")
+
+    evaluate_predictions(
+    prediction_df
+    )
 
     # Save prediction files
     print("\nSaving prediction files...")

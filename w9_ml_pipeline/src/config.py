@@ -48,6 +48,8 @@ PREDICTION_CSV = OUTPUT_DIR / "weather_predictions.csv"
 
 PREDICTION_PARQUET = OUTPUT_DIR / "weather_predictions.parquet"
 
+FIGURES_DIR = PROJECT_ROOT / "figures"
+
 # Constants
 
 PREDICTION_COLUMN = "predicted_temperature"
@@ -73,4 +75,5 @@ LOG_DIR = PROJECT_ROOT / "logs"
 # Create Required Directories
 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 LOG_DIR.mkdir(parents=True, exist_ok=True)

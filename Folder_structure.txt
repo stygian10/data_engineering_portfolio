@@ -39,6 +39,7 @@
 ├── w4_airflow_weather_pipeline
 │   ├── Dockerfile
 │   ├── README.md
+│   ├── config
 │   ├── dags
 │   │   ├── tasks
 │   │   └── weather_etl_dag.py
@@ -82,40 +83,41 @@
 │   │   ├── processed
 │   │   └── raw
 │   └── src
+│       ├── config.py
 │       ├── features.py
 │       ├── load_data.py
-│       └── pipeline.py
+│       └── main.py
 ├── w8_weather_prediction_model
 │   ├── README.md
 │   ├── data
 │   │   ├── processed
 │   │   └── raw
 │   ├── figures
-│   │   ├── actual_vs_predicted.png
 │   │   ├── feature_importance.png
 │   │   ├── model_comparison.png
-│   │   ├── residual_comparison.png
-│   │   └── residual_distribution.png
+│   │   └── residual_plot.png
 │   ├── models
-│   │   ├── baseline_linear_regression.pkl
 │   │   ├── linear_regression_model.pkl
 │   │   └── random_forest_model.pkl
 │   ├── notebooks
 │   │   └── weather_model_baseline.ipynb
 │   └── src
+│       ├── (baseline testing)train.py
 │       ├── compare_models.py
 │       ├── config.py
 │       ├── evaluate.py
-│       ├── predict.py
-│       └── train.py
+│       └── predict.py
 └── w9_ml_pipeline
     ├── README.md
     ├── data
     │   └── predictions
-    ├── models
-    │   └── random_forest_model.pkl
+    ├── figures
+    │   ├── error_distribution.png
+    │   ├── prediction_vs_actual.png
+    │   └── residual_plot.png
     └── src
         ├── config.py
+        ├── evaluate_predictions.py
         ├── load_features.py
         ├── load_model.py
         ├── main.py
@@ -123,4 +125,4 @@
         ├── save_predictions.py
         └── upload_to_minio.py
 
-54 directories, 70 files
+55 directories, 71 files

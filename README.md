@@ -24,8 +24,8 @@ API → Airflow → Spark → MinIO → Dashboard → Feature Engineering → ML
 | W12  | Deployment             |
 ---------------------------------
 ## Current Stage
- Completed: W1–W8  
-🚧 In Progress: W9 (Model API)
+ Completed: W1–W9  
+🚧 In Progress: W10 (Model API)
 
 ## Tech Stack
 Python, Pandas, PySpark, Airflow, Docker, MinIO (S3), PostgreSQL, Scikit-learn, Flask

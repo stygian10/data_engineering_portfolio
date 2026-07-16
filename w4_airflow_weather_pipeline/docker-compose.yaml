@@ -185,6 +185,7 @@ services:
 
     environment:
       MINIO_ENDPOINT: http://minio:9000
+      PYTHONPATH: /opt/airflow
 
     depends_on:
       minio:
@@ -193,6 +194,48 @@ services:
     command: python /opt/airflow/w6/src/app.py
 
     restart: always
+
+  fastapi:
+
+    build: ../w10_fastapi_service
+
+    container_name: fastapi
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - ../w10_fastapi_service:/app
+      - ../w7_feature_engineering:/app/w7_feature_engineering
+      - ../w8_weather_prediction_model:/app/w8_weather_prediction_model
+
+    environment:
+      PYTHONUNBUFFERED: "1"
+
+    restart: always
+
+  prediction-dashboard:
+
+    build: ../w10_fastapi_service
+
+    container_name: prediction-dashboard
+
+    working_dir: /app
+
+    ports:
+      - "8051:8051"
+
+    volumes:
+      - ../w10_fastapi_service:/app
+      - ../w9_ml_pipeline:/app/w9_ml_pipeline
+
+    environment:
+      PYTHONUNBUFFERED: "1"
+
+    command: python -m dashboard.app
+
+    restart: always
+
 
 
 volumes:

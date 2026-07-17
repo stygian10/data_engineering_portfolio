@@ -41,7 +41,20 @@ def load_prediction_data():
 
     df = pd.read_csv(PREDICTION_FILE)
 
+    # Convert date column
+
     df["date"] = pd.to_datetime(df["date"])
+
+    # Remove today's predictions
+    # Historical data should only contain previous days
+
+    from datetime import datetime
+
+    today = datetime.now().date()
+
+    df = df[df["date"].dt.date < today
+    
+    ]
 
     # Reconstruct city names from one-hot encoding
 

@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pandas
+numpy
+joblib
+scikit-learn
+pyarrow==20.0.0
+dash
+plotly
+boto3

@@ -227,6 +227,7 @@ services:
 
     volumes:
       - ../w10_fastapi_service:/app
+      - ../w7_feature_engineering:/app/w7_feature_engineering
       - ../w9_ml_pipeline:/app/w9_ml_pipeline
 
     environment:

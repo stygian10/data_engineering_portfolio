@@ -200,3 +200,38 @@ venv/
 # JUPYTER
 # ---------------------------
 .ipynb_checkpoints/
+# ---------------------------------------
+# Generated Dashboard Images
+# ---------------------------------------
+*.png
+*.jpg
+*.jpeg
+*.svg
+
+# ---------------------------------------
+# Generated CSV Outputs
+# ---------------------------------------
+*.csv
+
+# If you want to keep sample CSV files,
+# comment the line above and instead ignore:
+# **/outputs/
+# **/reports/
+
+# ---------------------------------------
+# Prediction Outputs
+# ---------------------------------------
+**/predictions/
+**/results/
+**/reports/
+
+# ---------------------------------------
+# Runtime Logs
+# ---------------------------------------
+logs/
+*.log
+
+# ---------------------------------------
+# Dash / Plotly cache
+# ---------------------------------------
+assets/.cache/

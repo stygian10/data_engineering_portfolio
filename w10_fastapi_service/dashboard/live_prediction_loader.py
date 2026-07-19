@@ -6,9 +6,9 @@ import pandas as pd
 
 logging.basicConfig(level=logging.INFO)
 
-# ------------------------------------------------------------------
+
 # Feature dataset paths
-# ------------------------------------------------------------------
+
 
 DOCKER_FEATURE_PATH = Path(
     "/app/w7_feature_engineering/data/processed/w7_features_final.parquet"
@@ -22,9 +22,9 @@ LOCAL_FEATURE_PATH = (
     / "w7_features_final.parquet"
 )
 
-# ------------------------------------------------------------------
+
 # Detect execution environment
-# ------------------------------------------------------------------
+
 
 if DOCKER_FEATURE_PATH.is_file():
 
@@ -41,9 +41,9 @@ else:
 logging.info(f"Feature File: {FEATURE_FILE}")
 
 
-# ------------------------------------------------------------------
+
 # Load feature dataset
-# ------------------------------------------------------------------
+
 
 def load_live_prediction_data():
     """
@@ -76,9 +76,9 @@ def load_live_prediction_data():
     return df
 
 
-# ------------------------------------------------------------------
+
 # Available cities
-# ------------------------------------------------------------------
+
 
 def get_available_cities(df):
     """
@@ -88,9 +88,9 @@ def get_available_cities(df):
     return sorted(df["city"].unique())
 
 
-# ------------------------------------------------------------------
+
 # City data
-# ------------------------------------------------------------------
+
 
 def get_city_data(df, city):
     """
@@ -102,9 +102,9 @@ def get_city_data(df, city):
     ].copy()
 
 
-# ------------------------------------------------------------------
+
 # Today's feature record
-# ------------------------------------------------------------------
+
 
 def get_today_record(df, city):
     """
@@ -170,9 +170,9 @@ def get_today_record(df, city):
     return today_df.iloc[0]
 
 
-# ------------------------------------------------------------------
+
 # Validate today's feature record
-# ------------------------------------------------------------------
+
 
 def validate_today_record(city):
     """

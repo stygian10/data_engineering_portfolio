@@ -2,6 +2,33 @@
 ├── Folder_structure.txt
 ├── README.md
 ├── requirements.txt
+├── w10_fastapi_service
+│   ├── Dockerfile
+│   ├── README.md
+│   ├── app
+│   │   ├── config.py
+│   │   ├── main.py
+│   │   ├── model_loader.py
+│   │   ├── predictor.py
+│   │   ├── routes.py
+│   │   └── schemas.py
+│   ├── dashboard
+│   │   ├── __init__.py
+│   │   ├── api_client.py
+│   │   ├── app.py
+│   │   ├── callbacks.py
+│   │   ├── layout.py
+│   │   ├── live_prediction_loader.py
+│   │   ├── prediction_loader.py
+│   │   └── styles.py
+│   ├── requirements.txt
+│   ├── tests
+│   │   ├── __init__.py
+│   │   ├── test_prediction.py
+│   │   └── test_prediction_loader.py
+│   ├── w7_feature_engineering
+│   ├── w8_weather_prediction_model
+│   └── w9_ml_pipeline
 ├── w1_weather_data_cleaner
 │   ├── README.md
 │   ├── README_TEMPLATE.md
@@ -43,6 +70,7 @@
 │   ├── dags
 │   │   ├── tasks
 │   │   └── weather_etl_dag.py
+│   ├── dashboard.log
 │   ├── data
 │   │   ├── parquet
 │   │   ├── processed
@@ -125,4 +153,4 @@
         ├── save_predictions.py
         └── upload_to_minio.py
 
-55 directories, 71 files
+62 directories, 92 files

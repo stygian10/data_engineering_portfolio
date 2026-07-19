@@ -71,8 +71,7 @@ live_prediction_section = html.Div(
         html.H2("Live Prediction"),
 
         create_source_box(
-            "Week 7 Feature Engineering Dataset (w7_features_final.parquet) → "
-            "FastAPI Prediction Service → Linear Regression Model"
+            "W7 Feature Engineering Dataset (w7_features_final.parquet) Processed by FastAPI using the trained Linear Regression model"
         ),
 
         html.Label("Select City"),
@@ -90,8 +89,8 @@ live_prediction_section = html.Div(
         html.Div(
             [
                 create_kpi_card("Today's Date", "kpi-date"),
-                create_kpi_card("Observed Temperature", "kpi-actual"),
-                create_kpi_card("ML Predicted Temperature", "kpi-prediction"),
+                create_kpi_card("Observed Average Temperature", "kpi-actual"),
+                create_kpi_card("Predicted Average Temperature", "kpi-prediction"),
                 create_kpi_card("Prediction Error", "kpi-error"),
             ],
             style=ROW_STYLE,
@@ -100,8 +99,8 @@ live_prediction_section = html.Div(
         html.Div(
             [
                 create_kpi_card("Next Day", "kpi-next-date"),
-                create_kpi_card("Observed Temperature", "kpi-next-actual"),
-                create_kpi_card("Predicted Temperature", "kpi-next-prediction"),
+                create_kpi_card("Observed Average Temperature", "kpi-next-actual"),
+                create_kpi_card("Predicted Average Temperature", "kpi-next-prediction"),
                 create_kpi_card("Prediction Error", "kpi-next-error"),
             ],
             style=ROW_STYLE,

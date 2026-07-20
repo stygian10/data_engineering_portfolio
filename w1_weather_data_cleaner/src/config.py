@@ -1,8 +1,6 @@
 from pathlib import Path
 
-# =============================================================================
 # Project Paths
-# =============================================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -13,9 +11,7 @@ PROCESSED_DATA_DIR = DATA_DIR / "processed"
 RAW_DATA_FILE = RAW_DATA_DIR / "historical_weather.csv"
 PROCESSED_DATA_FILE = PROCESSED_DATA_DIR / "uk_weather_clean.csv"
 
-# =============================================================================
 # Open-Meteo Configuration
-# =============================================================================
 
 API_URL = "https://archive-api.open-meteo.com/v1/archive"
 
@@ -25,9 +21,7 @@ START_DATE = "2025-01-01"
 
 # End date will always be calculated in download.py as yesterday.
 
-# =============================================================================
 # Cities
-# =============================================================================
 
 CITIES = [
     {
@@ -47,10 +41,7 @@ CITIES = [
     },
 ]
 
-# =============================================================================
 # Weather Variables
-# =============================================================================
-
 # Keep these aligned with the variables used throughout the portfolio
 # (W4 -> W10). Add new variables here if future weeks require them.
 
@@ -60,8 +51,6 @@ HOURLY_VARIABLES = [
     "wind_speed_10m",
 ]
 
-# =============================================================================
 # Request Configuration
-# =============================================================================
 
 REQUEST_TIMEOUT = 60   

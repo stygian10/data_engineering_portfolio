@@ -31,11 +31,9 @@ OUTPUT_DATA_PATH = (
 
 # MinIO Configuration
 
-# MinIO Configuration
-
 MINIO_ENDPOINT = os.getenv(
     "MINIO_ENDPOINT",
-    "http://localhost:9000"
+    "localhost:9000"
 )
 
 MINIO_ACCESS_KEY = os.getenv(
@@ -53,14 +51,22 @@ MINIO_BUCKET_NAME = os.getenv(
     "weather-data-lake"
 )
 
-MINIO_PREFIX = os.getenv(
-    "MINIO_PREFIX",
-    "processed/weather/"
+# Week 6 uploads a single parquet object
+MINIO_OBJECT_NAME = os.getenv(
+    "MINIO_OBJECT_NAME",
+    "weather_week5.parquet"
 )
 
 
-# Create Required Directories 
+# Local Download Path
 
+LOCAL_PARQUET_PATH = (
+    RAW_DATA_DIR
+    / "weather_week5.parquet"
+)
+
+
+# Create Required Directories
 
 RAW_DATA_DIR.mkdir(
     parents=True,

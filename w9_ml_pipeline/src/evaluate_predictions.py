@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import pandas as pd
 
 from sklearn.metrics import (
     mean_absolute_error,
@@ -8,6 +7,8 @@ from sklearn.metrics import (
 )
 
 from config import (
+    TARGET_COLUMN,
+    TIME_COLUMN,
     PREDICTION_COLUMN,
     FIGURES_DIR,
 )
@@ -26,17 +27,13 @@ def evaluate_predictions(prediction_df):
 
     print("\nEvaluating prediction outputs...")
 
-   
     # Actual vs Predicted
-   
 
-    y_true = prediction_df["target_temp_next_day"]
+    y_true = prediction_df[TARGET_COLUMN]
 
     y_pred = prediction_df[PREDICTION_COLUMN]
 
-   
     # Metrics
-   
 
     mae = mean_absolute_error(
         y_true,
@@ -61,9 +58,7 @@ def evaluate_predictions(prediction_df):
     print(f"RMSE : {rmse:.2f}")
     print(f"R²   : {r2:.2f}")
 
-   
-    # Error
-   
+    # Prediction Error
 
     prediction_df["prediction_error"] = (
         y_true -
@@ -78,26 +73,22 @@ def evaluate_predictions(prediction_df):
         ].describe()
     )
 
-   
     # Sample Predictions
-   
 
     print("\nSample Predictions")
 
     print(
         prediction_df[
             [
-                "date",
-                "target_temp_next_day",
+                TIME_COLUMN,
+                TARGET_COLUMN,
                 PREDICTION_COLUMN,
                 "prediction_error",
             ]
         ].head(10)
     )
 
-   
     # Prediction vs Actual
-   
 
     plt.figure(figsize=(7, 7))
 
@@ -122,9 +113,7 @@ def evaluate_predictions(prediction_df):
 
     plt.close()
 
-   
     # Residual Plot
-   
 
     plt.figure(figsize=(8, 5))
 
@@ -154,9 +143,7 @@ def evaluate_predictions(prediction_df):
 
     plt.close()
 
-   
     # Error Distribution
-   
 
     plt.figure(figsize=(8, 5))
 

@@ -5,9 +5,7 @@ from load_data import (
 
 from features import run_feature_pipeline
 
-from config import (
-    OUTPUT_DATA_PATH
-)
+from config import OUTPUT_DATA_PATH
 
 
 def save_data(df):
@@ -34,13 +32,13 @@ def main():
     Execute the complete Week 7 feature engineering pipeline.
     """
 
-    print("Downloading latest weather data from MinIO...")
+    print("Downloading latest weather dataset from MinIO...")
 
-    parquet_files = download_from_minio()
+    parquet_file = download_from_minio()
 
     print("\nLoading weather dataset...")
 
-    weather_df = load_data(parquet_files)
+    weather_df = load_data(parquet_file)
 
     print("\nRunning feature engineering pipeline...")
 
@@ -55,8 +53,10 @@ def main():
     print(f"\nRows: {len(feature_df)}")
     print(f"Columns: {len(feature_df.columns)}")
 
-    print("\nFirst five rows:")
+    print("\nColumns:")
+    print(feature_df.columns.tolist())
 
+    print("\nFirst five rows:")
     print(feature_df.head())
 
 

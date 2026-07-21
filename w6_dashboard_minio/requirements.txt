@@ -3,3 +3,4 @@ plotly
 dash
 boto3
 pyarrow
+minio

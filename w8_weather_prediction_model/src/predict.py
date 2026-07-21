@@ -1,25 +1,49 @@
 # W8 - WEATHER PREDICTION SCRIPT
-# Purpose: Load the trained Random Forest model and predict tomorrow's temperature using the latest engineered dataset.
+# Purpose:
+# Load the trained model and scaler, then predict the
+# next hour temperature using the latest engineered dataset.
+
+
+# IMPORT LIBRARIES
+
 
 import joblib
 import pandas as pd
 
 from config import (
     DATA_PATH,
-    TARGET_COLUMN
+    TARGET_COLUMN,
+    BEST_MODEL_PATH,
+    SCALER_PATH
 )
 
-# Load Trained Model
+
+# LOAD TRAINED MODEL
+
 
 print("Loading trained model...")
 
 model = joblib.load(
-    "models/random_forest_model.pkl"
+    BEST_MODEL_PATH
 )
 
 print("Model loaded successfully.")
 
-# Load Latest Feature Dataset
+
+# LOAD SCALER
+
+
+print("\nLoading scaler...")
+
+scaler = joblib.load(
+    SCALER_PATH
+)
+
+print("Scaler loaded successfully.")
+
+
+# LOAD FEATURE DATASET
+
 
 print("\nLoading feature dataset...")
 
@@ -30,64 +54,88 @@ print("Dataset loaded successfully.")
 print("\nDataset Shape:")
 print(df.shape)
 
-print("\nLatest Date:")
-print(df["date"].max())
+print("\nLatest Timestamp:")
+print(df["time"].max())
 
-# Remove Missing Values
+
+# REMOVE MISSING VALUES
+
 
 df = df.dropna()
 
-# Select Latest Record
+
+# SELECT LATEST RECORD
+
 
 latest_record = df.iloc[[-1]]
 
 print("\nUsing Latest Record")
-print(latest_record[["date"]])
 
-# -----------------------------------
-# Prepare Features
-# -----------------------------------
+print(
+    latest_record[["time"]]
+)
+
+
+# PREPARE FEATURES
+
 
 X = latest_record.drop(
     columns=[
         TARGET_COLUMN,
-        "date"
+        "time"
     ]
 )
 
-# -----------------------------------
-# Actual Target
-# -----------------------------------
+
+# ACTUAL TARGET
+
 
 actual_temperature = latest_record[
     TARGET_COLUMN
 ].values[0]
 
-# -----------------------------------
-# Make Prediction
-# -----------------------------------
+
+# SCALE FEATURES
+
+
+numerical_columns = X.select_dtypes(
+    include=["number"]
+).columns
+
+X = X.copy()
+
+X[numerical_columns] = scaler.transform(
+    X[numerical_columns]
+)
+
+
+# MAKE PREDICTION
+
 
 prediction = model.predict(X)
 
 predicted_temperature = prediction[0]
 
-# -----------------------------------
-# Display Results
-# -----------------------------------
+
+# DISPLAY RESULTS
+
 
 print("\nPrediction Results")
+
 print("-" * 40)
 
 print(
-    f"Actual Temperature     : {actual_temperature:.2f} °C"
+    f"Actual Temperature    : "
+    f"{actual_temperature:.2f} °C"
 )
 
 print(
-    f"Predicted Temperature  : {predicted_temperature:.2f} °C"
+    f"Predicted Temperature : "
+    f"{predicted_temperature:.2f} °C"
 )
 
 print(
-    f"Prediction Error       : "
+    f"Prediction Error      : "
     f"{abs(actual_temperature - predicted_temperature):.2f} °C"
 )
 

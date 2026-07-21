@@ -32,14 +32,20 @@ FEATURE_DATA_PATH = (
     / "w7_features_final.parquet"
 )
 
-MODEL_PATH = (
+BEST_MODEL_PATH = (
     PORTFOLIO_ROOT
     / W8_FOLDER
     / "models"
-    / "linear_regression_model.pkl"
+    / "best_model.pkl"
 )
 
-# 
+SCALER_PATH = (
+    PORTFOLIO_ROOT
+    / W8_FOLDER
+    / "models"
+    / "scaler.pkl"
+)
+
 # Output Paths
 
 OUTPUT_DIR = PROJECT_ROOT / "data" / "predictions"
@@ -50,9 +56,13 @@ PREDICTION_PARQUET = OUTPUT_DIR / "weather_predictions.parquet"
 
 FIGURES_DIR = PROJECT_ROOT / "figures"
 
-# Constants
+# Prediction Configuration
+
+TARGET_COLUMN = "target_temp_next_hour"
 
 PREDICTION_COLUMN = "predicted_temperature"
+
+TIME_COLUMN = "time"
 
 # MinIO Configuration
 

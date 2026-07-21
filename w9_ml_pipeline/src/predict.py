@@ -1,9 +1,13 @@
 import pandas as pd
 
-from config import PREDICTION_COLUMN
+from config import (
+    TARGET_COLUMN,
+    TIME_COLUMN,
+    PREDICTION_COLUMN
+)
 
 
-def predict(model, features_df):
+def predict(model, scaler, features_df):
     """
     Generate weather predictions using the trained model.
 
@@ -11,6 +15,9 @@ def predict(model, features_df):
     ----------
     model : BaseEstimator
         Trained Scikit-learn model.
+
+    scaler : StandardScaler
+        Trained scaler from Week 8.
 
     features_df : pandas.DataFrame
         Engineered feature dataset.
@@ -24,25 +31,28 @@ def predict(model, features_df):
     # Create a copy of the dataset
     prediction_df = features_df.copy()
 
-    # Prepare the feature matrix
+    # Prepare feature matrix
     X = prediction_df.drop(
         columns=[
-            "date",
-            "target_temp_next_day"
+            TIME_COLUMN,
+            TARGET_COLUMN
         ]
     )
 
-    # Convert all features to float64
+    # Convert features to float64
     X = X.astype("float64")
 
-    # Generate predictions
-    predictions = model.predict(X)
+    # Apply scaler
+    X_scaled = scaler.transform(X)
 
-    # Add predictions to the DataFrame
+    # Generate predictions
+    predictions = model.predict(X_scaled)
+
+    # Add predictions to dataframe
     prediction_df[PREDICTION_COLUMN] = predictions
 
     # Display summary
-    print("Predictions generated successfully.")
+    print("\nPredictions generated successfully.")
     print(f"Rows processed: {len(prediction_df)}")
     print(f"Prediction column: {PREDICTION_COLUMN}")
 

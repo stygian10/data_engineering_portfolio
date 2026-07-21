@@ -8,13 +8,13 @@
 # - Model Comparison Plot
 # - Feature Importance Plot
 # - Residual Comparison Plot
-# ----------------------------------
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import joblib
 
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 
@@ -23,7 +23,6 @@ from sklearn.metrics import (
     mean_squared_error,
     r2_score
 )
-# Added a new configuration file that would defines the entire path in w8
 
 from config import (
     DATA_PATH,
@@ -31,13 +30,17 @@ from config import (
     RANDOM_STATE,
     TEST_SIZE,
     MODEL_OUTPUT_DIR,
-    FIGURES_DIR,
+    LINEAR_MODEL_PATH,
+    RANDOM_FOREST_MODEL_PATH,
+    BEST_MODEL_PATH,
+    SCALER_PATH,
     MODEL_COMPARISON_FIGURE,
     FEATURE_IMPORTANCE_FIGURE,
     RESIDUAL_COMPARISON_FIGURE
 )
 
-# Load Dataset
+
+# LOAD DATASET
 
 
 print("Loading dataset...")
@@ -47,15 +50,11 @@ df = pd.read_parquet(DATA_PATH)
 print("\nDataset Shape:")
 print(df.shape)
 
-print("\nDate Range:")
-print(df["date"].min())
-print(df["date"].max())
-
 print("\nFirst 5 Rows:")
 print(df.head())
 
 
-# Prepare Features & Target
+# PREPARE FEATURES & TARGET
 
 
 print("\nPreparing dataset...")
@@ -65,7 +64,7 @@ df = df.dropna()
 X = df.drop(
     columns=[
         TARGET_COLUMN,
-        "date"
+        "time"
     ]
 )
 
@@ -78,7 +77,7 @@ print("\nTarget Shape:")
 print(y.shape)
 
 
-# Train/Test Split
+# TRAIN / TEST SPLIT
 
 
 X_train, X_test, y_train, y_test = train_test_split(
@@ -97,7 +96,37 @@ print("y_train Shape:", y_train.shape)
 print("y_test Shape :", y_test.shape)
 
 
-# Train Linear Regression
+# SCALE FEATURES
+
+
+print("\nScaling numerical features...")
+
+scaler = StandardScaler()
+
+numerical_columns = X_train.select_dtypes(
+    include=["number"]
+).columns
+
+X_train = X_train.copy()
+X_test = X_test.copy()
+
+X_train[numerical_columns] = scaler.fit_transform(
+    X_train[numerical_columns]
+)
+
+X_test[numerical_columns] = scaler.transform(
+    X_test[numerical_columns]
+)
+
+joblib.dump(
+    scaler,
+    SCALER_PATH
+)
+
+print(f"Scaler saved to: {SCALER_PATH}")
+
+
+# TRAIN LINEAR REGRESSION
 
 
 print("\nTraining Linear Regression Model...")
@@ -116,8 +145,7 @@ linear_predictions = linear_model.predict(
 print("Linear Regression Training Complete")
 
 
-
-# Train Random Forest
+# TRAIN RANDOM FOREST
 
 
 print("\nTraining Random Forest Model...")
@@ -139,8 +167,7 @@ rf_predictions = rf_model.predict(
 
 print("Random Forest Training Complete")
 
-
-# Evaluation Function
+# EVALUATION FUNCTION
 
 
 def evaluate_model(
@@ -177,7 +204,7 @@ def evaluate_model(
     return mae, rmse, r2
 
 
-# Evaluate Linear Regression
+# EVALUATE LINEAR REGRESSION
 
 
 linear_metrics = evaluate_model(
@@ -187,7 +214,7 @@ linear_metrics = evaluate_model(
 )
 
 
-# Evaluate Random Forest
+# EVALUATE RANDOM FOREST
 
 
 rf_metrics = evaluate_model(
@@ -197,33 +224,39 @@ rf_metrics = evaluate_model(
 )
 
 
-# Model Comparison Table
+# MODEL COMPARISON TABLE
 
 
 comparison_df = pd.DataFrame({
+
     "Model": [
         "Linear Regression",
         "Random Forest"
     ],
+
     "MAE": [
         linear_metrics[0],
         rf_metrics[0]
     ],
+
     "RMSE": [
         linear_metrics[1],
         rf_metrics[1]
     ],
+
     "R2": [
         linear_metrics[2],
         rf_metrics[2]
     ]
+
 })
 
 print("\nModel Comparison")
 print(comparison_df)
 
 
-# Save Model Comparison Plot
+# SAVE MODEL COMPARISON PLOT
+
 
 plt.figure(figsize=(8, 6))
 
@@ -233,11 +266,11 @@ plt.bar(
 )
 
 plt.ylabel("R² Score")
+
 plt.title("Model Comparison")
 
 plt.tight_layout()
 
-# plot saving 
 plt.savefig(
     MODEL_COMPARISON_FIGURE,
     dpi=300,
@@ -248,35 +281,50 @@ plt.close()
 
 print(f"\nSaved: {MODEL_COMPARISON_FIGURE}")
 
-# Feature Importance Analysis
+
+# FEATURE IMPORTANCE ANALYSIS
+
 
 feature_importance = pd.DataFrame({
-    "Feature": X.columns,
+
+    "Feature": X_train.columns,
+
     "Importance": rf_model.feature_importances_
+
 })
 
 feature_importance = feature_importance.sort_values(
+
     by="Importance",
+
     ascending=False
+
 )
 
 print("\nTop 10 Most Important Features")
+
 print(
     feature_importance.head(10)
 )
 
-# Save Feature Importance Plot
+
+# SAVE FEATURE IMPORTANCE PLOT
+
 
 top_features = feature_importance.head(10)
 
 plt.figure(figsize=(10, 6))
 
 plt.barh(
+
     top_features["Feature"],
+
     top_features["Importance"]
+
 )
 
 plt.xlabel("Importance")
+
 plt.title("Top 10 Feature Importance")
 
 plt.gca().invert_yaxis()
@@ -284,9 +332,13 @@ plt.gca().invert_yaxis()
 plt.tight_layout()
 
 plt.savefig(
+
     FEATURE_IMPORTANCE_FIGURE,
+
     dpi=300,
+
     bbox_inches="tight"
+
 )
 
 plt.close()
@@ -294,7 +346,7 @@ plt.close()
 print(f"Saved: {FEATURE_IMPORTANCE_FIGURE}")
 
 
-# Residual Analysis
+# RESIDUAL ANALYSIS
 
 
 linear_residuals = (
@@ -307,20 +359,22 @@ rf_residuals = (
     rf_predictions
 )
 
-# Save Residual Comparison Plot
+
+# SAVE RESIDUAL COMPARISON PLOT
+
 
 plt.figure(figsize=(8, 6))
 
 plt.hist(
     linear_residuals,
-    bins=15,
+    bins=20,
     alpha=0.5,
     label="Linear Regression"
 )
 
 plt.hist(
     rf_residuals,
-    bins=15,
+    bins=20,
     alpha=0.5,
     label="Random Forest"
 )
@@ -328,11 +382,10 @@ plt.hist(
 plt.legend()
 
 plt.xlabel("Residual Error")
+
 plt.ylabel("Frequency")
 
-plt.title(
-    "Residual Comparison"
-)
+plt.title("Residual Comparison")
 
 plt.tight_layout()
 
@@ -346,21 +399,17 @@ plt.close()
 
 print(f"Saved: {RESIDUAL_COMPARISON_FIGURE}")
 
+# SELECT BEST MODEL
 
-# Select Best Model
 
 print("\nBest Model Selection")
 
-# Create models folder if it doesn't exist
 
 if rf_metrics[2] > linear_metrics[2]:
 
     best_model = rf_model
     model_name = "Random Forest"
-    model_path = (
-    MODEL_OUTPUT_DIR
-    / "random_forest_model.pkl"
-)
+    best_model_path = RANDOM_FOREST_MODEL_PATH
 
     print("\nSelected Model: Random Forest")
 
@@ -375,10 +424,7 @@ else:
 
     best_model = linear_model
     model_name = "Linear Regression"
-    model_path = (
-    MODEL_OUTPUT_DIR
-    / "linear_regression_model.pkl"
-)
+    best_model_path = LINEAR_MODEL_PATH
 
     print("\nSelected Model: Linear Regression")
 
@@ -388,17 +434,85 @@ else:
     )
 
 
-# Save Best Model
+# SAVE BOTH MODELS
+
+
+joblib.dump(
+    linear_model,
+    LINEAR_MODEL_PATH
+)
+
+print(
+    f"\nLinear Regression model saved to:\n"
+    f"{LINEAR_MODEL_PATH}"
+)
+
+
+joblib.dump(
+    rf_model,
+    RANDOM_FOREST_MODEL_PATH
+)
+
+print(
+    f"\nRandom Forest model saved to:\n"
+    f"{RANDOM_FOREST_MODEL_PATH}"
+)
+
+
+# SAVE BEST MODEL
 
 
 joblib.dump(
     best_model,
-    model_path
+    BEST_MODEL_PATH
 )
 
-print(f"\nModel saved successfully.")
+print(
+    f"\nBest model saved to:\n"
+    f"{BEST_MODEL_PATH}"
+)
 
-print(f"Model Name : {model_name}")
-print(f"Model Path : {model_path}")
 
-print("\nModel comparison completed successfully.")
+# SUMMARY
+
+
+print("\n" + "=" * 60)
+print("MODEL TRAINING SUMMARY")
+print("=" * 60)
+
+print(f"Dataset Shape      : {df.shape}")
+print(f"Training Samples   : {X_train.shape[0]}")
+print(f"Testing Samples    : {X_test.shape[0]}")
+
+print("\nModel Performance")
+
+print(
+    f"Linear Regression  -> "
+    f"MAE: {linear_metrics[0]:.2f} | "
+    f"RMSE: {linear_metrics[1]:.2f} | "
+    f"R²: {linear_metrics[2]:.2f}"
+)
+
+print(
+    f"Random Forest      -> "
+    f"MAE: {rf_metrics[0]:.2f} | "
+    f"RMSE: {rf_metrics[1]:.2f} | "
+    f"R²: {rf_metrics[2]:.2f}"
+)
+
+print(f"\nSelected Model     : {model_name}")
+
+print("\nSaved Files")
+
+print(f"Linear Model       : {LINEAR_MODEL_PATH}")
+print(f"Random Forest      : {RANDOM_FOREST_MODEL_PATH}")
+print(f"Best Model         : {BEST_MODEL_PATH}")
+print(f"Scaler             : {SCALER_PATH}")
+
+print("\nGenerated Figures")
+
+print(f"Model Comparison   : {MODEL_COMPARISON_FIGURE}")
+print(f"Feature Importance : {FEATURE_IMPORTANCE_FIGURE}")
+print(f"Residual Plot      : {RESIDUAL_COMPARISON_FIGURE}")
+
+print("\nWeek 8 model comparison completed successfully.")

@@ -1,29 +1,44 @@
 import joblib
 
-from config import MODEL_PATH
+from config import (
+    BEST_MODEL_PATH,
+    SCALER_PATH
+)
 
 
 def load_model():
     """
-    Load the trained machine learning model.
+    Load the trained machine learning model and scaler.
 
     Returns
     -------
-    BaseEstimator
-        Trained Scikit-learn model.
+    tuple
+        (trained_model, fitted_scaler)
     """
 
     # Check if the model exists
-    if not MODEL_PATH.exists():
+    if not BEST_MODEL_PATH.exists():
         raise FileNotFoundError(
-            f"Model file not found:\n{MODEL_PATH}"
+            f"Model file not found:\n{BEST_MODEL_PATH}"
+        )
+
+    # Check if the scaler exists
+    if not SCALER_PATH.exists():
+        raise FileNotFoundError(
+            f"Scaler file not found:\n{SCALER_PATH}"
         )
 
     # Load the model
-    model = joblib.load(MODEL_PATH)
+    model = joblib.load(BEST_MODEL_PATH)
+
+    # Load the scaler
+    scaler = joblib.load(SCALER_PATH)
 
     # Confirmation message
     print("\nModel loaded successfully.")
-    print(f"Model path: {MODEL_PATH}")
+    print(f"Model path: {BEST_MODEL_PATH}")
 
-    return model
+    print("\nScaler loaded successfully.")
+    print(f"Scaler path: {SCALER_PATH}")
+
+    return model, scaler

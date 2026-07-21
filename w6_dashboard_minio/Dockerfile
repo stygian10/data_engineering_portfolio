@@ -4,17 +4,17 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
-# Copy requirements first for caching
+# Copy requirements first for layer caching
 COPY requirements.txt .
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy rest of the source code
+# Copy the project
 COPY . .
 
-# Expose port 8050 for Dash
+# Expose Dash port
 EXPOSE 8050
 
-# Run the dashboard
+# Start the dashboard
 CMD ["python", "src/app.py"]

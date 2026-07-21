@@ -1,4 +1,3 @@
-import glob
 import os
 
 import boto3
@@ -9,104 +8,95 @@ from config import (
     MINIO_ACCESS_KEY,
     MINIO_SECRET_KEY,
     MINIO_BUCKET_NAME,
-    MINIO_PREFIX,
+    MINIO_OBJECT_NAME,
     RAW_DATA_DIR,
+    LOCAL_PARQUET_PATH,
 )
 
 
 def download_from_minio():
     """
-    Download the latest weather parquet files from MinIO.
+    Download the latest weather dataset from MinIO.
     """
 
     print("\nConnecting to MinIO...")
 
     s3 = boto3.client(
         "s3",
-        endpoint_url=MINIO_ENDPOINT,
+        endpoint_url=f"http://{MINIO_ENDPOINT}",
         aws_access_key_id=MINIO_ACCESS_KEY,
         aws_secret_access_key=MINIO_SECRET_KEY,
     )
 
     print("Connected successfully.")
 
-    # Create raw directory
     RAW_DATA_DIR.mkdir(
         parents=True,
-        exist_ok=True
+        exist_ok=True,
     )
 
-    # Remove old raw parquet files
-    old_files = glob.glob(
-        str(RAW_DATA_DIR / "*.parquet")
-    )
+    if LOCAL_PARQUET_PATH.exists():
+        os.remove(LOCAL_PARQUET_PATH)
+        print("Removed old parquet dataset.")
 
-    for file in old_files:
-        os.remove(file)
+    print(f"\nSearching '{MINIO_OBJECT_NAME}' for parquet files...")
 
-    print(f"Removed {len(old_files)} old parquet files.")
-
-    # List objects in MinIO
     response = s3.list_objects_v2(
         Bucket=MINIO_BUCKET_NAME,
-        Prefix=MINIO_PREFIX
+        Prefix=f"{MINIO_OBJECT_NAME}/",
     )
 
-    parquet_files = []
+    parquet_key = None
 
     for obj in response.get("Contents", []):
-
         key = obj["Key"]
 
         if key.endswith(".parquet"):
+            parquet_key = key
+            break
 
-            local_file = (
-                RAW_DATA_DIR
-                / key.split("/")[-1]
-            )
+    if parquet_key is None:
+        raise FileNotFoundError(
+            f"No parquet file found inside '{MINIO_OBJECT_NAME}'."
+        )
 
-            s3.download_file(
-                MINIO_BUCKET_NAME,
-                key,
-                str(local_file)
-            )
+    print(f"Found: {parquet_key}")
 
-            parquet_files.append(local_file)
+    print("\nDownloading parquet file...")
 
-    print(f"Downloaded {len(parquet_files)} parquet files.")
-
-    return parquet_files
-
-
-def load_data(parquet_files):
-    """
-    Load all downloaded parquet files into one DataFrame.
-    """
-
-    df_list = []
-
-    for file in parquet_files:
-
-        df = pd.read_parquet(file)
-
-        df_list.append(df)
-
-    weather_df = pd.concat(
-        df_list,
-        ignore_index=True
+    s3.download_file(
+        Bucket=MINIO_BUCKET_NAME,
+        Key=parquet_key,
+        Filename=str(LOCAL_PARQUET_PATH),
     )
+
+    print("Download completed.")
+
+    return LOCAL_PARQUET_PATH
+
+
+def load_data(parquet_file):
+    """
+    Load the downloaded parquet dataset.
+    """
+
+    weather_df = pd.read_parquet(parquet_file)
 
     print("\nDataset loaded successfully.")
     print(f"Rows: {len(weather_df)}")
     print(f"Columns: {len(weather_df.columns)}")
+
+    print("\nColumn Names:")
+    print(weather_df.columns.tolist())
 
     return weather_df
 
 
 if __name__ == "__main__":
 
-    files = download_from_minio()
+    parquet_file = download_from_minio()
 
-    df = load_data(files)
+    weather_df = load_data(parquet_file)
 
-    print(df.head())
+    print("\nFirst five rows:")
+    print(weather_df.head())

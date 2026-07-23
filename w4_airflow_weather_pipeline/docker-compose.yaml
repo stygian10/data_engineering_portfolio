@@ -1,4 +1,3 @@
-
 x-airflow-common: &airflow-common
   build: .
   image: airflow-custom:latest
@@ -6,9 +5,7 @@ x-airflow-common: &airflow-common
   environment: &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
     AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
-
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
-
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
 
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
@@ -20,22 +17,36 @@ x-airflow-common: &airflow-common
 
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
 
-    MINIO_ENDPOINT: http://minio:9000
+    DB_HOST: postgres
+    DB_PORT: 5432
+    DB_NAME: airflow
+    DB_USER: airflow
+    DB_PASSWORD: airflow
 
+    W2_DATA_FILE: /opt/airflow/w2/data/processed/weather_ready_for_postgres.csv
     W7_FEATURE_DATA_PATH: /opt/airflow/w7/data/processed/w7_features_final.parquet
+
+    MINIO_ENDPOINT: minio:9000
+
+    PYTHONPATH: /opt/airflow
 
   volumes:
     - ./dags:/opt/airflow/dags
+    - ./src:/opt/airflow/src
     - ./logs:/opt/airflow/logs
     - ./plugins:/opt/airflow/plugins
     - ./config:/opt/airflow/config
     - ./data:/opt/airflow/data
 
+    - ../w1_weather_data_cleaner:/opt/airflow/w1
+    - ../w2_weather_etl_pipeline:/opt/airflow/w2
+    - ../w3_postgresql_loader:/opt/airflow/w3
     - ../w5_spark_weather_etl:/opt/airflow/w5
-    - ../w6_visualisation_dashboard:/opt/airflow/w6
+    - ../w6_dashboard_minio:/opt/airflow/w6
     - ../w7_feature_engineering:/opt/airflow/w7
     - ../w8_weather_prediction_model:/opt/airflow/w8
     - ../w9_ml_pipeline:/opt/airflow/w9
+    - ../w10_fastapi_service:/opt/airflow/w10
 
 services:
 
@@ -51,18 +62,19 @@ services:
       - postgres-db-volume:/var/lib/postgresql/data
 
     healthcheck:
-      test: ["CMD","pg_isready","-U","airflow"]
+      test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s
       retries: 5
       start_period: 5s
 
     restart: always
 
-
   minio:
     image: minio/minio
 
     container_name: minio
+
+    command: server /data --console-address ":9001"
 
     ports:
       - "9000:9000"
@@ -72,13 +84,10 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
 
-    command: server /data --console-address ":9001"
-
     volumes:
       - minio-data:/data
 
     restart: always
-
 
   airflow-init:
 
@@ -105,7 +114,6 @@ services:
 
     restart: "no"
 
-
   airflow-apiserver:
 
     <<: *airflow-common
@@ -120,13 +128,12 @@ services:
         condition: service_completed_successfully
 
     healthcheck:
-      test: ["CMD","curl","--fail","http://localhost:8080/api/v2/monitor/health"]
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/api/v2/monitor/health"]
       interval: 30s
       timeout: 10s
       retries: 5
 
     restart: always
-
 
   airflow-scheduler:
 
@@ -169,10 +176,8 @@ services:
 
     restart: always
 
-
   dashboard:
-
-    build: ../w6_visualisation_dashboard
+    build: ../w6_dashboard_minio
 
     container_name: dashboard
 
@@ -180,18 +185,16 @@ services:
       - "8050:8050"
 
     volumes:
-      - ../w6_visualisation_dashboard:/opt/airflow/w6
-      - ./data:/opt/airflow/data
+      - ../w6_dashboard_minio:/app
 
     environment:
-      MINIO_ENDPOINT: http://minio:9000
-      PYTHONPATH: /opt/airflow
+      MINIO_ENDPOINT: minio:9000
 
     depends_on:
       minio:
         condition: service_started
 
-    command: python /opt/airflow/w6/src/app.py
+    command: python -m src.app
 
     restart: always
 
@@ -201,6 +204,13 @@ services:
 
     container_name: fastapi
 
+    working_dir: /app
+
+    command: >
+      uvicorn app.main:app
+      --host 0.0.0.0
+      --port 8000
+
     ports:
       - "8000:8000"
 
@@ -208,9 +218,16 @@ services:
       - ../w10_fastapi_service:/app
       - ../w7_feature_engineering:/app/w7_feature_engineering
       - ../w8_weather_prediction_model:/app/w8_weather_prediction_model
+      - ../w9_ml_pipeline:/app/w9_ml_pipeline
 
     environment:
       PYTHONUNBUFFERED: "1"
+
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
     restart: always
 
@@ -222,22 +239,26 @@ services:
 
     working_dir: /app
 
+    command: python -m dashboard.app
+
     ports:
       - "8051:8051"
 
     volumes:
       - ../w10_fastapi_service:/app
       - ../w7_feature_engineering:/app/w7_feature_engineering
+      - ../w8_weather_prediction_model:/app/w8_weather_prediction_model
       - ../w9_ml_pipeline:/app/w9_ml_pipeline
 
     environment:
       PYTHONUNBUFFERED: "1"
+      FASTAPI_URL: http://fastapi:8000
 
-    command: python -m dashboard.app
+    depends_on:
+      fastapi:
+        condition: service_started
 
     restart: always
-
-
 
 volumes:
 

@@ -1,45 +1,102 @@
-# Defines the API endpoints
+import logging
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
+from app.predictor import predict
 from app.schemas import (
-    WeatherFeatures,
+    PredictionRequest,
     PredictionResponse,
 )
 
-from app.predictor import predict
+
+logging.basicConfig(level=logging.INFO)
 
 router = APIRouter()
 
 
-@router.get("/")
-def root():
+@router.get(
+    "/",
+    tags=["Health"],
+)
+def health_check():
+    """
+    Verify that the prediction API is running.
+    """
+
+    logging.info("Health check requested.")
 
     return {
-        "message": "Weather Prediction API"
-    }
-
-
-@router.get("/health")
-def health():
-
-    return {
-        "status": "healthy"
+        "status": "online",
+        "message": "Weather Prediction API is running.",
     }
 
 
 @router.post(
     "/predict",
     response_model=PredictionResponse,
+    tags=["Prediction"],
 )
 def predict_temperature(
-    weather: WeatherFeatures,
+    request: PredictionRequest,
 ):
+    """
+    Predict the next-hour temperature using the
+    trained weather prediction model.
+    """
 
-    prediction = predict(
-        weather.model_dump()
-    )
+    try:
 
-    return PredictionResponse(
-        predicted_temperature=prediction
-    )
+        logging.info(
+            "Prediction request received."
+        )
+
+        prediction = predict(
+            request.model_dump()
+        )
+
+        logging.info(
+            f"Prediction completed: {prediction:.2f} °C"
+        )
+
+        return PredictionResponse(
+            predicted_temperature=round(
+                prediction,
+                2,
+            )
+        )
+
+    except ValueError as exc:
+
+        logging.exception(
+            "Invalid prediction request."
+        )
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        )
+
+    except FileNotFoundError:
+
+        logging.exception(
+            "Model file not found."
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail="Trained model could not be loaded.",
+        )
+
+    except Exception:
+
+        logging.exception(
+            "Unexpected prediction error."
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "An unexpected error occurred "
+                "while generating the prediction."
+            ),
+        )

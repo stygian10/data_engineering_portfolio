@@ -2,12 +2,12 @@ from pathlib import Path
 
 from minio import S3Error
 
-from config import (
+from .config import (
     BUCKET_NAME,
     LOCAL_PARQUET_PATH,
     OBJECT_PREFIX,
 )
-from minio_client import get_minio_client
+from .minio_client import get_minio_client
 
 
 def upload_parquet_dataset():

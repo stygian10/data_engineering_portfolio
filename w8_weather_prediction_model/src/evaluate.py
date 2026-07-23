@@ -10,8 +10,10 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import json
 import joblib
 
+from datetime import datetime
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import (
     mean_absolute_error,
@@ -26,6 +28,7 @@ from config import (
     TEST_SIZE,
     BEST_MODEL_PATH,
     SCALER_PATH,
+    MODEL_METRICS_PATH,
     ACTUAL_VS_PREDICTED_FIGURE,
     RESIDUAL_DISTRIBUTION_FIGURE
 )
@@ -166,6 +169,34 @@ print(f"MAE  : {mae:.2f}")
 print(f"RMSE : {rmse:.2f}")
 print(f"R²   : {r2:.2f}")
 
+# SAVE MODEL METRICS
+
+
+metrics = {
+    "model_name": type(model).__name__,
+    "r2": round(r2, 4),
+    "rmse": round(rmse, 4),
+    "mae": round(mae, 4),
+    "training_rows": len(df),
+    "trained_at": datetime.now().strftime(
+        "%d %b %Y %H:%M")
+}
+
+with open(
+    MODEL_METRICS_PATH,
+    "w"
+) as file:
+
+    json.dump(
+        metrics,
+        file,
+        indent=4
+    )
+
+print(
+    f"\nModel metrics saved to "
+    f"{MODEL_METRICS_PATH}"
+)
 
 # ACTUAL VS PREDICTED PLOT
 

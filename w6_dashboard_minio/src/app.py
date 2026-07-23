@@ -1,6 +1,6 @@
 from dash import Dash
 
-from dashboard import app_layout, register_callbacks
+from .dashboard import app_layout, register_callbacks
 
 app = Dash(__name__)
 

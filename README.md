@@ -30,12 +30,50 @@ API → Airflow → Spark → MinIO → Dashboard → Feature Engineering → ML
 ## Tech Stack
 Python, Pandas, PySpark, Airflow, Docker, MinIO (S3), PostgreSQL, Scikit-learn, Flask
 
-                      Historical Pipeline (Runs Once)
-                                W1 → W2 → W3
-                                    │
-                                    ▼
-                          Historical Database
-                                    │
-                                    ▼
-                     Daily Pipeline (Runs Every Day)
-                    W4 → W5 → W6 → W7 → W8 → W9 → W10
+Week 1
+↓
+Historical weather CSV
+↓
+Week 2
+↓
+Cleaned CSV
+↓
+Week 3
+↓
+PostgreSQL
+↓
+Week 4
+↓
+Airflow orchestration + Forecast API
+↓
+Week 5
+↓
+Spark Parquet
+↓
+Week 6
+↓
+MinIO + Dashboard
+↓
+Week 7
+↓
+Feature Engineering
+↓
+Week 8
+↓
+ML Model
+↓
+Week 9
+↓
+Batch Prediction
+↓
+Week 10
+↓
+FastAPI + Dashboard Integration
+↓
+Week 11
+↓
+Deployment
+↓
+Week 12
+↓
+Testing & Documentation

@@ -3,12 +3,12 @@ import shutil
 
 import pandas as pd
 
-from config import (
+from .config import (
     BUCKET_NAME,
     OBJECT_PREFIX,
     LOCAL_DOWNLOAD_PATH,
 )
-from minio_client import get_minio_client
+from .minio_client import get_minio_client
 
 
 def load_weather_data():

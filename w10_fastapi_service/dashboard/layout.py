@@ -10,6 +10,7 @@ PAGE_STYLE = {
     "backgroundColor": "#f5f5f5",
 }
 
+
 SECTION_STYLE = {
     "backgroundColor": "white",
     "padding": "20px",
@@ -18,11 +19,13 @@ SECTION_STYLE = {
     "boxShadow": "0 2px 6px rgba(0,0,0,0.15)",
 }
 
+
 ROW_STYLE = {
     "display": "flex",
     "gap": "20px",
     "marginBottom": "20px",
 }
+
 
 KPI_STYLE = {
     "flex": "1",
@@ -33,6 +36,7 @@ KPI_STYLE = {
     "boxShadow": "0 1px 4px rgba(0,0,0,0.15)",
 }
 
+
 SOURCE_STYLE = {
     "marginBottom": "20px",
     "padding": "10px",
@@ -42,27 +46,57 @@ SOURCE_STYLE = {
     "color": "#444444",
 }
 
-TABLE_STYLE = {"overflowX": "auto"}
+
+TABLE_STYLE = {
+    "overflowX": "auto",
+}
 
 
-# Reusable KPI card
+
+# Reusable Components
 
 def create_kpi_card(title, component_id):
-    return html.Div([html.H4(title), html.H2(id=component_id)], style=KPI_STYLE)
+    """
+    Create a reusable KPI card.
+    """
 
+    return html.Div(
+        [
+            html.H4(title),
+            html.H2(id=component_id),
+        ],
+        style=KPI_STYLE,
+    )
 
-# Reusable source information box
 
 def create_source_box(text):
-    return html.Div([html.B("Source: "), html.Span(text)], style=SOURCE_STYLE)
+    """
+    Create a reusable data source information box.
+    """
 
+    return html.Div(
+        [
+            html.B("Source: "),
+            html.Span(text),
+        ],
+        style=SOURCE_STYLE,
+    )
 
-# Reusable model information row
 
 def create_model_row(title, component_id):
-    return html.Tr([html.Th(title), html.Td(id=component_id)])
+    """
+    Create a reusable model information row.
+    """
 
-# Live prediction section
+    return html.Tr(
+        [
+            html.Th(title),
+            html.Td(id=component_id),
+        ]
+    )
+
+# Live Prediction Section
+
 
 live_prediction_section = html.Div(
 
@@ -71,13 +105,16 @@ live_prediction_section = html.Div(
         html.H2("Live Prediction"),
 
         create_source_box(
-            "W7 Feature Engineering Dataset (w7_features_final.parquet) Processed by FastAPI using the trained Linear Regression model"
+            "Week 7 Feature Engineering Dataset "
+            "(w7_features_final.parquet) "
+            "served through the Week 10 FastAPI "
+            "prediction service."
         ),
 
         html.Label("Select City"),
 
         dcc.Dropdown(
-            id="live-city-dropdown",
+            id="city-dropdown",
             placeholder="Select a city",
             clearable=False,
         ),
@@ -87,23 +124,33 @@ live_prediction_section = html.Div(
         html.H3("Prediction Summary"),
 
         html.Div(
-            [
-                create_kpi_card("Today's Date", "kpi-date"),
-                create_kpi_card("Observed Average Temperature", "kpi-actual"),
-                create_kpi_card("Predicted Average Temperature", "kpi-prediction"),
-                create_kpi_card("Prediction Error", "kpi-error"),
-            ],
-            style=ROW_STYLE,
-        ),
 
-        html.Div(
             [
-                create_kpi_card("Next Day", "kpi-next-date"),
-                create_kpi_card("Observed Average Temperature", "kpi-next-actual"),
-                create_kpi_card("Predicted Average Temperature", "kpi-next-prediction"),
-                create_kpi_card("Prediction Error", "kpi-next-error"),
+
+                create_kpi_card(
+                    "Current Hour",
+                    "latest-update",
+                ),
+
+                create_kpi_card(
+                    "Current Temperature",
+                    "current-temperature",
+                ),
+
+                create_kpi_card(
+                    "Predicted Temperature",
+                    "predicted-temperature",
+                ),
+
+                create_kpi_card(
+                    "Prediction Difference",
+                    "prediction-difference",
+                ),
+
             ],
+
             style=ROW_STYLE,
+
         ),
 
         html.H3("Model Information"),
@@ -111,6 +158,7 @@ live_prediction_section = html.Div(
         html.P(
 
             [
+
                 html.B("Model: "),
                 html.Span(id="model-name"),
 
@@ -133,9 +181,18 @@ live_prediction_section = html.Div(
 
                 html.B("Dataset: "),
                 html.Span(id="model-dataset"),
+
+                "   |   ",
+
+                html.B("Last Trained: "),
+                html.Span(id="model-trained-at"),
+
             ],
 
-            style={"fontSize": "16px", "lineHeight": "1.8",},
+            style={
+                "fontSize": "16px",
+                "lineHeight": "1.8",
+            },
 
         ),
 
@@ -144,7 +201,11 @@ live_prediction_section = html.Div(
     style=SECTION_STYLE,
 
 )
-# Historical prediction section
+
+
+
+# Historical Prediction Section
+
 
 historical_prediction_section = html.Div(
 
@@ -153,7 +214,8 @@ historical_prediction_section = html.Div(
         html.H2("Historical Prediction"),
 
         create_source_box(
-            "Week 9 Prediction Dataset (weather_predictions.csv)"
+            "Week 9 Prediction Dataset "
+            "(weather_predictions.csv)"
         ),
 
         html.Label("Select City"),
@@ -184,11 +246,26 @@ historical_prediction_section = html.Div(
             id="prediction-table",
 
             columns=[
-                {"name": "Date", "id": "date"},
-                {"name": "City", "id": "city"},
-                {"name": "Actual Temperature (°C)", "id": "target_temp_next_day"},
-                {"name": "Predicted Temperature (°C)", "id": "predicted_temperature"},
-                {"name": "Prediction Error (°C)", "id": "prediction_error"},
+                {
+                    "name": "Date & Time",
+                    "id": "time",
+                },
+                {
+                    "name": "City",
+                    "id": "city",
+                },
+                {
+                    "name": "Actual Temperature (°C)",
+                    "id": "target_temp_next_hour",
+                },
+                {
+                    "name": "Predicted Temperature (°C)",
+                    "id": "predicted_temperature",
+                },
+                {
+                    "name": "Prediction Error (°C)",
+                    "id": "prediction_error",
+                },
             ],
 
             data=[],
@@ -217,7 +294,10 @@ historical_prediction_section = html.Div(
 
 )
 
-# Historical model performance section
+
+
+# Historical Model Performance Section
+
 
 historical_performance_section = html.Div(
 
@@ -227,14 +307,18 @@ historical_performance_section = html.Div(
 
         dcc.Graph(
             id="actual-vs-predicted-chart",
-            config={"displayModeBar": False},
+            config={
+                "displayModeBar": False,
+            },
         ),
 
         html.Br(),
 
         dcc.Graph(
             id="prediction-error-chart",
-            config={"displayModeBar": False},
+            config={
+                "displayModeBar": False,
+            },
         ),
 
     ],
@@ -242,18 +326,24 @@ historical_performance_section = html.Div(
     style=SECTION_STYLE,
 
 )
-# Dashboard layout
+
+
+# Dashboard Layout
+
 
 layout = html.Div(
 
     [
 
         html.H1(
+
             "Weather Prediction Analytics Dashboard",
+
             style={
                 "textAlign": "center",
                 "marginBottom": "30px",
             },
+
         ),
 
         live_prediction_section,
@@ -268,30 +358,14 @@ layout = html.Div(
 
 )
 
-layout = html.Div(
 
-    [
 
-        html.H1(
-            "Weather Prediction Analytics Dashboard",
-            style={
-                "textAlign": "center",
-                "marginBottom": "30px",
-            },
-        ),
-
-        live_prediction_section,
-
-        historical_prediction_section,
-
-        historical_performance_section,
-
-    ],
-
-    style=PAGE_STYLE,
-
-)
+# Layout Factory
 
 
 def create_layout():
+    """
+    Return the dashboard layout.
+    """
+
     return layout

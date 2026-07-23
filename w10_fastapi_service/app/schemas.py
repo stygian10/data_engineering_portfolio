@@ -1,18 +1,19 @@
-# Defines request/response models
 from pydantic import BaseModel
 
 
-class WeatherFeatures(BaseModel):
+class PredictionRequest(BaseModel):
     temperature: float
-    temp_max: float
-    temp_min: float
     humidity: float
     windspeed: float
-    rolling_avg_temp: float
 
-    day_of_week: int
+    year: int
     month: int
+    day: int
+    hour: int
+    day_of_week: int
     week_of_year: int
+    day_of_year: int
+    is_weekend: int
 
     temp_rolling_mean: float
     humidity_rolling_mean: float
@@ -31,8 +32,10 @@ class WeatherFeatures(BaseModel):
     humidity_pct_change: float
     windspeed_pct_change: float
 
-    city_London: bool
-    city_Manchester: bool
+    city_London: int
+    city_Manchester: int
+
+    source_forecast: int
 
 
 class PredictionResponse(BaseModel):

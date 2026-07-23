@@ -79,6 +79,13 @@ SCALER_PATH = (
     / "scaler.pkl"
 )
 
+# Model Metrics
+
+
+MODEL_METRICS_PATH = (
+    MODEL_OUTPUT_DIR
+    / "model_metrics.json"
+)
 
 # Figures Directory
 

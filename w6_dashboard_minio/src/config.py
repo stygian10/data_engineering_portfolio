@@ -17,16 +17,44 @@ MINIO_SECURE = False
 BUCKET_NAME = "weather-data-lake"
 OBJECT_PREFIX = "weather_week5.parquet"
 
+# ------------------------------------------------------------------
 # Week 5 Spark Dataset
-LOCAL_PARQUET_PATH = (
-    BASE_DIR
-    / "w5_spark_weather_etl"
-    / "data"
-    / "processed"
-    / "weather_week5.parquet"
-)
+# Works in both:
+# - Local development (w5_spark_weather_etl)
+# - Docker / Airflow (w5)
+# ------------------------------------------------------------------
 
+WEEK5_CANDIDATES = [
+    BASE_DIR / "w5_spark_weather_etl",
+    BASE_DIR / "w5",
+]
+
+LOCAL_PARQUET_PATH = None
+
+for week5_dir in WEEK5_CANDIDATES:
+    candidate = (
+        week5_dir
+        / "data"
+        / "processed"
+        / "weather_week5.parquet"
+    )
+
+    if candidate.exists():
+        LOCAL_PARQUET_PATH = candidate
+        break
+
+if LOCAL_PARQUET_PATH is None:
+    LOCAL_PARQUET_PATH = (
+        WEEK5_CANDIDATES[0]
+        / "data"
+        / "processed"
+        / "weather_week5.parquet"
+    )
+
+# ------------------------------------------------------------------
 # Local Download Directory
+# ------------------------------------------------------------------
+
 LOCAL_DATA_DIR = PROJECT_DIR / "data"
 
 LOCAL_DOWNLOAD_PATH = (

@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import datetime
 import logging
 
 import pandas as pd
@@ -41,29 +42,26 @@ def load_prediction_data():
 
     df = pd.read_csv(PREDICTION_FILE)
 
-    # Convert date column
+    # Convert timestamp column
 
-    df["date"] = pd.to_datetime(df["date"])
+    df["time"] = pd.to_datetime(df["time"])
 
     # Remove today's predictions
     # Historical data should only contain previous days
 
-    from datetime import datetime
-
     today = datetime.now().date()
 
-    df = df[df["date"].dt.date < today
-    
-    ]
+    df = df[df["time"].dt.date < today]
 
     # Reconstruct city names from one-hot encoding
 
     df["city"] = "Edinburgh"
 
-    df.loc[df["city_London"], "city"] = "London"
-    df.loc[df["city_Manchester"], "city"] = "Manchester"
+    df.loc[df["city_London"] == 1, "city"] = "London"
+    df.loc[df["city_Manchester"] == 1, "city"] = "Manchester"
 
     logging.info(f"Loaded {len(df)} prediction rows.")
+
 
     return df
 
@@ -84,9 +82,10 @@ def get_available_dates(df):
     """Return all available dates."""
 
     return (
-        df["date"]
-        .sort_values()
+        df["time"]
         .dt.strftime("%Y-%m-%d")
+        .sort_values()
+        .unique()
         .tolist()
     )
 
@@ -102,19 +101,20 @@ def filter_city_data(df, city):
     return df[df["city"] == city].copy()
 
 
-def filter_prediction_data(df, city, selected_date):
+def filter_prediction_data(df, city, selected_date=None):
     """
-    Return a single prediction record.
-
-    Used by KPI cards.
+    Return prediction history for the selected city.
+    Optionally filter by a specific date.
     """
 
     filtered_df = filter_city_data(df, city)
 
     if selected_date:
 
+        selected_date = pd.to_datetime(selected_date).date()
+
         filtered_df = filtered_df[
-            filtered_df["date"] == pd.to_datetime(selected_date)
+            filtered_df["time"].dt.date == selected_date
         ]
 
     return filtered_df

@@ -1,91 +1,38 @@
-from pathlib import Path
 import logging
 
-import requests 
+import requests
+
 
 logging.basicConfig(level=logging.INFO)
 
-# FastAPI endpoints
 
-DOCKER_API_URL = "http://fastapi:8000/predict"
+# FastAPI endpoint
 
-LOCAL_API_URL = "http://127.0.0.1:8000/predict"
+API_URL = "http://fastapi:8000/predict"
 
-# Detect execution environment
 
-if Path("/.dockerenv").exists():
-
-    API_URL = DOCKER_API_URL
-
-    logging.info("Running inside Docker")
-
-else:
-
-    API_URL = LOCAL_API_URL
-
-    logging.info("Running locally")
-
-logging.info(f"FastAPI Endpoint: {API_URL}")
-
-#JSON Payload
-
-def build_payload(row):
+def request_prediction(payload):
     """
-    Convert a prediction record into the
-    JSON payload expected by the FastAPI
-    prediction endpoint.
-    """
+    Send a prediction request to the FastAPI service.
 
-    payload = {
+    Parameters
+    ----------
+    payload : dict
+        Feature dictionary prepared from the
+        latest W7 feature record.
 
-        "temperature": float(row["temperature"]),
-        "temp_max": float(row["temp_max"]),
-        "temp_min": float(row["temp_min"]),
+    Returns
+    -------
+    float
+        Predicted temperature.
 
-        "humidity": float(row["humidity"]),
-        "windspeed": float(row["windspeed"]),
-
-        "rolling_avg_temp": float(row["rolling_avg_temp"]),
-
-        "day_of_week": int(row["day_of_week"]),
-        "month": int(row["month"]),
-        "week_of_year": int(row["week_of_year"]),
-
-        "temp_rolling_mean": float(row["temp_rolling_mean"]),
-        "humidity_rolling_mean": float(row["humidity_rolling_mean"]),
-        "windspeed_rolling_mean": float(row["windspeed_rolling_mean"]),
-
-        "temp_lag_1": float(row["temp_lag_1"]),
-        "temp_lag_3": float(row["temp_lag_3"]),
-
-        "humidity_lag_1": float(row["humidity_lag_1"]),
-        "windspeed_lag_1": float(row["windspeed_lag_1"]),
-
-        "temp_delta": float(row["temp_delta"]),
-        "humidity_delta": float(row["humidity_delta"]),
-        "windspeed_delta": float(row["windspeed_delta"]),
-
-        "temp_pct_change": float(row["temp_pct_change"]),
-        "humidity_pct_change": float(row["humidity_pct_change"]),
-        "windspeed_pct_change": float(row["windspeed_pct_change"]),
-
-        "city_London": bool(row["city_London"]),
-        "city_Manchester": bool(row["city_Manchester"]),
-    }
-
-    return payload
-
-# Handle JSON Response & Send HTTP POST request, error handling
-
-def request_prediction(row):
-    """
-    Send a prediction request to the FastAPI service
-    and return the predicted temperature.
+    Raises
+    ------
+    RuntimeError
+        If the API request fails.
     """
 
     try:
-
-        payload = build_payload(row)
 
         response = requests.post(
             API_URL,
@@ -95,47 +42,53 @@ def request_prediction(row):
 
         response.raise_for_status()
 
-        prediction = response.json()
-
-        return prediction
-
-    except requests.exceptions.ConnectionError:
+    except requests.exceptions.RequestException as exc:
 
         logging.error(
-            "Unable to connect to the FastAPI service."
+            f"Prediction request failed: {exc}"
         )
 
-        return None
+        raise RuntimeError(
+            "Unable to connect to the prediction service."
+        ) from exc
 
-    except requests.exceptions.Timeout:
+    result = response.json()
 
-        logging.error(
-            "The request to the FastAPI service timed out."
+    if "predicted_temperature" not in result:
+
+        raise RuntimeError(
+            "Prediction response is missing "
+            "'predicted_temperature'."
         )
 
-        return None
+    prediction = result["predicted_temperature"]
 
-    except requests.exceptions.HTTPError as error:
+    logging.info(
+        f"Prediction received: {prediction:.2f} °C"
+    )
 
-        logging.error(
-            f"HTTP Error: {error}"
+    return prediction
+
+
+def check_api_health():
+    """
+    Check whether the FastAPI service is running.
+
+    Returns
+    -------
+    bool
+        True if the API is reachable.
+    """
+
+    try:
+
+        response = requests.get(
+            "http://fastapi:8000/",
+            timeout=5,
         )
 
-        return None
+        return response.status_code == 200
 
-    except requests.exceptions.RequestException as error:
+    except requests.exceptions.RequestException:
 
-        logging.error(
-            f"Request Error: {error}"
-        )
-
-        return None
-
-    except Exception as error:
-
-        logging.exception(
-            f"Unexpected Error: {error}"
-        )
-
-        return None
-
+        return False

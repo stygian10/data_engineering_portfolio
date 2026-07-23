@@ -1,7 +1,7 @@
 import pandas as pd
 from dash import Input, Output, dash_table, dcc, html
 
-from data_loader import load_weather_data
+from .data_loader import load_weather_data
 
 
 # Load data once when the application starts

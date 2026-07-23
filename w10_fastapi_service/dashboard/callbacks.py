@@ -1,376 +1,496 @@
-from datetime import timedelta
-
+import dash
 import plotly.graph_objects as go
-from dash import Input, Output
+import json
 
+from dash import (
+    Input,
+    Output,
+)
+
+from app.config import MODEL_METRICS_PATH
 from dashboard.api_client import request_prediction
 
 from dashboard.live_prediction_loader import (
-    get_available_cities,
     load_live_prediction_data,
-    validate_today_record,
+    get_available_cities,
+    get_latest_record,
+    prepare_api_payload,
 )
 
 from dashboard.prediction_loader import (
-    filter_city_data,
-    get_available_dates,
     load_prediction_data,
+    filter_prediction_data,
 )
 
 
+
+# Load dashboard datasets
+
+
+FEATURE_DATA = load_live_prediction_data()
+
+PREDICTION_DATA = load_prediction_data()
+
+
+# Load Model Metrics
+
+
+def load_model_metrics():
+    """
+    Load model evaluation metrics generated
+    during Week 8 evaluation.
+    """
+
+    with open(
+        MODEL_METRICS_PATH,
+        "r",
+    ) as file:
+
+        return json.load(file)
+
+
+
+# Register Callbacks
+
+
 def register_callbacks(app):
+    """
+    Register all dashboard callbacks.
+    """
 
-    # Live city dropdown
+    # --------------------------------------------------------
+    # Populate City Dropdowns
+    # --------------------------------------------------------
 
     @app.callback(
-        Output("live-city-dropdown", "options"),
-        Input("live-city-dropdown", "id"),
+
+        Output(
+            "city-dropdown",
+            "options",
+        ),
+
+        Output(
+            "history-city-dropdown",
+            "options",
+        ),
+
+        Input(
+            "city-dropdown",
+            "id",
+        ),
+
     )
-    def populate_live_city_dropdown(_):
+    def populate_city_dropdowns(_):
+        """
+        Populate both dashboard city dropdowns.
+        """
 
-        df = load_live_prediction_data()
-        cities = get_available_cities(df)
+        cities = get_available_cities(
+            FEATURE_DATA
+        )
 
-        return [{"label": city, "value": city} for city in cities]
-    
-        # Live prediction summary
+        options = [
+
+            {
+                "label": city,
+                "value": city,
+            }
+
+            for city in cities
+
+        ]
+
+        return (
+            options,
+            options,
+        )
+    # --------------------------------------------------------
+    # Live Prediction
+    # --------------------------------------------------------
 
     @app.callback(
 
-        Output("kpi-date", "children"),
-        Output("kpi-actual", "children"),
-        Output("kpi-prediction", "children"),
-        Output("kpi-error", "children"),
+        Output(
+            "latest-update",
+            "children",
+        ),
 
-        Output("kpi-next-date", "children"),
-        Output("kpi-next-actual", "children"),
-        Output("kpi-next-prediction", "children"),
-        Output("kpi-next-error", "children"),
+        Output(
+            "current-temperature",
+            "children",
+        ),
 
-        Output("model-name", "children"),
-        Output("model-r2", "children"),
-        Output("model-rmse", "children"),
-        Output("model-mae", "children"),
-        Output("model-dataset", "children"),
+        Output(
+            "predicted-temperature",
+            "children",
+        ),
 
-        Input("live-city-dropdown", "value"),
+        Output(
+            "prediction-difference",
+            "children",
+        ),
+
+        Input(
+            "city-dropdown",
+            "value",
+        ),
 
     )
     def update_live_prediction(city):
+        """
+        Update the live prediction KPI cards for the
+        selected city.
+        """
 
-        if not city:
+        if city is None:
 
-            return (
-                "", "", "", "",
-                "", "", "", "",
-                "", "", "", "", ""
-            )
+            raise dash.exceptions.PreventUpdate
 
-        status, message, record = validate_today_record(city)
+        # Get latest feature record
 
-        if not status:
+        record = get_latest_record(
+            FEATURE_DATA,
+            city,
+        )
+
+        if record is None:
 
             return (
                 "Unavailable",
-                "--",
-                message,
-                "--",
-
-                "--",
-                "--",
-                "--",
-                "--",
-
-                "Linear Regression",
-                "0.91",
-                "2.05°C",
-                "1.69°C",
-                "120 Records",
+                "N/A",
+                "N/A",
+                "N/A",
             )
-        
-        
-        prediction = request_prediction(record)
 
-        
+        # Prepare FastAPI payload
 
-        if prediction is None:
+        payload = prepare_api_payload(
+            record
+        )
+
+        try:
+
+            prediction = request_prediction(
+                payload
+            )
+
+        except Exception:
 
             return (
-                record["date"].strftime("%d %b %Y"),
-                f"{record['temperature']:.1f}°C",
-                "FastAPI Unavailable",
-                "--",
-
-                "--",
-                "--",
-                "--",
-                "--",
-
-                "Linear Regression",
-                "0.91",
-                "2.05°C",
-                "1.69°C",
-                "120 Records",
-            )
-
-        predicted_temperature = prediction["predicted_temperature"]
-
-        df = load_live_prediction_data()
-
-        today_date_value = record["date"]
-
-        today_row = df[
-            (df["city"] == city)
-            & (df["date"] == today_date_value)
-        ].iloc[0]
-
-        tomorrow_date_value = today_date_value + timedelta(days=1)
-
-        tomorrow_rows = df[
-            (df["city"] == city)
-            & (df["date"] == tomorrow_date_value)
-        ]
-
-        today_date = today_date_value.strftime("%d %b %Y")
-
-        today_temperature = round(
-            today_row["target_temp_next_day"],
-            2,
-        )
-
-        today_error = round(
-            abs(today_temperature - predicted_temperature),
-            2,
-        )
-
-        next_day = tomorrow_date_value.strftime("%d %b %Y")
-
-        if not tomorrow_rows.empty:
-
-            tomorrow_temperature = round(
-                tomorrow_rows.iloc[0]["target_temp_next_day"],
-                2,
-            )
-
-        else:
-
-            tomorrow_temperature = None
-
-        tomorrow_prediction = round(
-            predicted_temperature,
-            2,
-        )
-
-        if tomorrow_temperature is not None:
-
-            tomorrow_error = round(
-                abs(
-                    tomorrow_temperature - tomorrow_prediction
+                record["time"].strftime(
+                    "%d %b %Y %H:%M"
                 ),
-                2,
+                f"{record['temperature']:.1f} °C",
+                "Unavailable",
+                "Prediction API Offline",
             )
 
-        else:
+        current_temperature = float(
+            record["temperature"]
+        )
 
-            tomorrow_error = None
+        prediction_difference = round(
+            prediction - current_temperature,
+            2,
+        )
+
+        latest_timestamp = (
+            record["time"].strftime(
+                "%d %b %Y %H:%M"
+            )
+        )
+
         return (
 
-            today_date,
-            f"{today_temperature:.2f}°C",
-            f"{predicted_temperature:.2f}°C",
-            f"{today_error:.2f}°C",
+            latest_timestamp,
 
-            next_day,
-            f"{tomorrow_temperature:.2f}°C" if tomorrow_temperature is not None else "--",
-            f"{tomorrow_prediction:.2f}°C",
-            f"{tomorrow_error:.2f}°C" if tomorrow_error is not None else "--",
+            f"{current_temperature:.1f} °C",
 
-            "Linear Regression",
-            "0.91",
-            "2.05°C",
-            "1.69°C",
-            "120 Records",
+            f"{prediction:.1f} °C",
+
+            f"{prediction_difference:+.2f} °C",
 
         )
-        # Historical city dropdown
+    # --------------------------------------------------------
+    # Historical Prediction
+    # --------------------------------------------------------
 
     @app.callback(
-        Output("history-city-dropdown", "options"),
-        Input("history-city-dropdown", "id"),
+
+        Output(
+            "prediction-table",
+            "data",
+        ),
+
+        Output(
+            "actual-vs-predicted-chart",
+            "figure",
+        ),
+
+        Output(
+            "prediction-error-chart",
+            "figure",
+        ),
+
+        Input(
+            "history-city-dropdown",
+            "value",
+        ),
+
+        Input(
+            "history-date-picker",
+            "date",
+        ),
+
     )
-    def populate_history_city_dropdown(_):
+    def update_historical_prediction(
+        city,
+        selected_date,
+    ):
+        """
+        Update the historical prediction table
+        and performance charts.
+        """
 
-        df = load_prediction_data()
-        cities = sorted(df["city"].unique())
+        if city is None:
 
-        return [{"label": city, "value": city} for city in cities]
+            raise dash.exceptions.PreventUpdate
 
+        # ----------------------------------------
+        # Filter prediction dataset
+        # ----------------------------------------
 
-    # Historical date picker
+        filtered_df = filter_prediction_data(
 
-    @app.callback(
-        Output("history-date-picker", "min_date_allowed"),
-        Output("history-date-picker", "max_date_allowed"),
-        Output("history-date-picker", "date"),
-        Input("history-city-dropdown", "value"),
-    )
-    def update_history_date_picker(city):
+            PREDICTION_DATA,
 
-        if not city:
-            return None, None, None
+            city,
 
-        df = load_prediction_data()
-        city_df = filter_city_data(df, city)
-        dates = get_available_dates(city_df)
+            selected_date,
 
-        if not dates:
-            return None, None, None
+        )
 
-        return dates[0], dates[-1], None
+        if filtered_df.empty:
 
-    # Historical prediction table
+            empty_figure = go.Figure()
 
-    @app.callback(
-        Output("prediction-table", "data"),
-        Input("history-city-dropdown", "value"),
-        Input("history-date-picker", "date"),
-    )
-    def update_prediction_table(city, selected_date):
+            empty_figure.update_layout(
 
-        if not city:
-            return []
+                title="No prediction data available"
 
-        df = load_prediction_data()
-        table_df = filter_city_data(df, city)
-
-        # Apply optional date filter
-
-        if selected_date:
-            table_df = table_df[table_df["date"] == selected_date]
-
-        if table_df.empty:
-            return []
-
-        # Sort newest records first
-
-        table_df = table_df.sort_values("date", ascending=False)
-
-        # Select table columns
-
-        table_df = table_df[
-            [
-                "date",
-                "city",
-                "target_temp_next_day",
-                "predicted_temperature",
-                "prediction_error",
-            ]
-        ].copy()
-
-        # Format values
-
-        table_df["date"] = table_df["date"].dt.strftime("%d %b %Y")
-        table_df["target_temp_next_day"] = table_df["target_temp_next_day"].round(2)
-        table_df["predicted_temperature"] = table_df["predicted_temperature"].round(2)
-        table_df["prediction_error"] = table_df["prediction_error"].round(2)
-
-        return table_df.to_dict("records")
-    
-        # Historical model performance charts
-
-    @app.callback(
-        Output("actual-vs-predicted-chart", "figure"),
-        Output("prediction-error-chart", "figure"),
-        Input("history-city-dropdown", "value"),
-        Input("history-date-picker", "date"),
-    )
-    def update_historical_charts(city, selected_date):
-
-        empty_figure = go.Figure()
-
-        if not city:
-            return empty_figure, empty_figure
-
-        df = load_prediction_data()
-        chart_df = filter_city_data(df, city)
-
-        # Apply optional date filter
-
-        if selected_date:
-            chart_df = chart_df[chart_df["date"] == selected_date]
-
-        if chart_df.empty:
-            return empty_figure, empty_figure
-
-        chart_df = chart_df.sort_values("date")
-
-        # Actual vs predicted temperature chart
-
-        prediction_figure = go.Figure()
-
-        prediction_figure.add_trace(
-            go.Scatter(
-                x=chart_df["date"],
-                y=chart_df["target_temp_next_day"],
-                mode="lines+markers",
-                name="Observed",
             )
+
+            return (
+
+                [],
+
+                empty_figure,
+
+                empty_figure,
+
+            )
+
+        # ----------------------------------------
+        # Prediction table
+        # ----------------------------------------
+
+        table_df = filtered_df.copy()
+
+        table_df["time"] = (
+
+            table_df["time"]
+
+            .dt.strftime("%Y-%m-%d %H:%M")
+
         )
 
-        prediction_figure.add_trace(
+        table_data = table_df.to_dict(
+
+            "records"
+
+        )
+
+        # ----------------------------------------
+        # Actual vs Predicted Chart
+        # ----------------------------------------
+
+        actual_chart = go.Figure()
+
+        actual_chart.add_trace(
+
             go.Scatter(
-                x=chart_df["date"],
-                y=chart_df["predicted_temperature"],
-                mode="lines+markers",
+
+                x=filtered_df["time"],
+
+                y=filtered_df[
+                    "target_temp_next_hour"
+                ],
+
+                mode="lines",
+
+                name="Actual",
+
+            )
+
+        )
+
+        actual_chart.add_trace(
+
+            go.Scatter(
+
+                x=filtered_df["time"],
+
+                y=filtered_df[
+                    "predicted_temperature"
+                ],
+
+                mode="lines",
+
                 name="Predicted",
+
             )
+
         )
 
-        prediction_figure.update_layout(
-            title="Observed vs Predicted Temperature",
-            template="plotly_white",
+        actual_chart.update_layout(
+
+            title="Actual vs Predicted Temperature",
+
             xaxis_title="Date",
+
             yaxis_title="Temperature (°C)",
+
             hovermode="x unified",
-            legend={
-                "orientation": "h",
-                "yanchor": "bottom",
-                "y": 1.02,
-                "xanchor": "right",
-                "x": 1,
-            },
+
         )
 
-        # Prediction error chart
+        # ----------------------------------------
+        # Prediction Error Chart
+        # ----------------------------------------
 
-        error_figure = go.Figure()
+        error_chart = go.Figure()
 
-        error_figure.add_trace(
-            go.Scatter(
-                x=chart_df["date"],
-                y=chart_df["prediction_error"],
-                mode="lines+markers",
+        error_chart.add_trace(
+
+            go.Bar(
+
+                x=filtered_df["time"],
+
+                y=filtered_df[
+                    "prediction_error"
+                ],
+
                 name="Prediction Error",
+
             )
+
         )
 
-        error_figure.add_hline(
-            y=0,
-            line_dash="dash",
-            line_color="red",
-        )
+        error_chart.update_layout(
 
-        error_figure.update_layout(
-            title="Prediction Error Over Time",
-            template="plotly_white",
+            title="Prediction Error",
+
             xaxis_title="Date",
-            yaxis_title="Prediction Error (°C)",
-            hovermode="x unified",
-            showlegend=False,
+
+            yaxis_title="Error (°C)",
+
         )
 
-        return prediction_figure, error_figure
-    
+        return (
+
+            table_data,
+
+            actual_chart,
+
+            error_chart,
+
+        )
+    # --------------------------------------------------------
+    # Model Information
+    # --------------------------------------------------------
+
+    @app.callback(
+
+        Output(
+            "model-name",
+            "children",
+        ),
+
+        Output(
+            "model-r2",
+            "children",
+        ),
+
+        Output(
+            "model-rmse",
+            "children",
+        ),
+
+        Output(
+            "model-mae",
+            "children",
+        ),
+
+        Output(
+            "model-dataset",
+            "children",
+        ),
+
+        Output(
+            "model-trained-at",
+            "children",
+        ),
+
+        Input(
+            "city-dropdown",
+            "value",
+        ),
+
+    )
+    def update_model_information(_):
+        """
+        Display model information from the latest
+        Week 8 evaluation.
+        """
+
+        metrics = load_model_metrics()
+
+        model_name = metrics["model_name"]
+
+        r2_score = (
+            f"{metrics['r2']:.2f}"
+        )
+
+        rmse = (
+            f"{metrics['rmse']:.2f} °C"
+        )
+
+        mae = (
+            f"{metrics['mae']:.2f} °C"
+        )
+
+        dataset = (
+            f"{metrics['training_rows']:,} "
+            "engineered feature records"
+        )
+
+        trained_at = (
+            metrics["trained_at"]
+        )
 
 
-    
+        return (
+
+            model_name,
+
+            r2_score,
+
+            rmse,
+
+            mae,
+
+            dataset,
+
+            trained_at,
+
+        )

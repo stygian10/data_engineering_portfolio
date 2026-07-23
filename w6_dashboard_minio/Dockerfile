@@ -16,5 +16,5 @@ COPY . .
 # Expose Dash port
 EXPOSE 8050
 
-# Start the dashboard
-CMD ["python", "src/app.py"]
+# Start the dashboard as a Python package
+CMD ["python", "-m", "src.app"]

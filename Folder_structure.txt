@@ -35,49 +35,55 @@
 │   ├── data
 │   │   ├── processed
 │   │   └── raw
-│   ├── figures
-│   │   ├── precip_bar_2024.png
-│   │   ├── temp_boxplot_season_city.png
-│   │   ├── temp_trend_edinburgh.png
-│   │   ├── temp_trend_london.png
-│   │   └── temp_trend_manchester.png
-│   └── notebooks
-│       ├── 01_fetch_clean_eda.ipynb
-│       ├── README_TEMPLATE.md
-│       ├── data
-│       ├── figures
-│       └── test.ipynb
+│   └── src
+│       ├── clean.py
+│       ├── config.py
+│       ├── download.py
+│       └── main.py
 ├── w2_weather_etl_pipeline
 │   ├── README.md
 │   ├── data
-│   │   ├── input
-│   │   └── output
-│   ├── docker
-│   └── scripts
-│       └── etl.py
-├── w3_PostgreSQLDataLoader
+│   │   ├── processed
+│   │   └── raw
+│   └── src
+│       ├── config.py
+│       ├── extract.py
+│       ├── load.py
+│       ├── main.py
+│       ├── transform.py
+│       └── validate.py
+├── w3_postgresql_loader
 │   ├── README.md
-│   ├── createtables.py
-│   ├── db_connect.py
-│   ├── load_data.py
-│   ├── python_exploration_28Jan.py
-│   └── sql
-│       └── eda_queries.sql
+│   ├── data
+│   └── src
+│       ├── config.py
+│       ├── database.py
+│       ├── load_data.py
+│       ├── main.py
+│       └── validate_load.py
 ├── w4_airflow_weather_pipeline
 │   ├── Dockerfile
 │   ├── README.md
 │   ├── config
 │   ├── dags
-│   │   ├── tasks
 │   │   └── weather_etl_dag.py
 │   ├── dashboard.log
 │   ├── data
-│   │   ├── parquet
 │   │   ├── processed
 │   │   └── raw
 │   ├── docker-compose.yaml
 │   ├── requirements.txt
-│   └── scripts
+│   └── src
+│       ├── __init__.py
+│       ├── cleanup.py
+│       ├── config.py
+│       ├── create_tables.py
+│       ├── database.py
+│       ├── extract.py
+│       ├── load.py
+│       ├── main.py
+│       ├── transform.py
+│       └── validate.py
 ├── w5_spark_weather_etl
 │   ├── README.md
 │   ├── data
@@ -86,27 +92,34 @@
 │   ├── notebooks
 │   │   └── spark_etl_analysis.ipynb
 │   ├── requirements.txt
-│   ├── src
-│   │   ├── extract.py
-│   │   ├── load.py
-│   │   ├── main.py
-│   │   ├── spark_sql_analysis.py
-│   │   └── transform.py
-│   └── tests
+│   ├── tests
+│   │   ├── __init__.py
+│   │   └── test_pyspark_vs_pandas_real.py.py
+│   └── weather_etl
 │       ├── __init__.py
-│       └── test_pyspark_vs_pandas_real.py.py
-├── w6_visualisation_dashboard
+│       ├── config.py
+│       ├── extract.py
+│       ├── load.py
+│       ├── main.py
+│       ├── spark_sql_analysis.py
+│       └── transform.py
+├── w6_dashboard_minio
 │   ├── Dockerfile
 │   ├── README.md
 │   ├── data
+│   │   └── weather_week5.parquet
 │   ├── requirements.txt
-│   ├── scripts
-│   │   └── upload_to_minio.py
 │   └── src
+│       ├── __init__.py
 │       ├── app.py
-│       └── test_data_access.py
+│       ├── config.py
+│       ├── dashboard.py
+│       ├── data_loader.py
+│       ├── minio_client.py
+│       └── upload_to_minio.py
 ├── w7_feature_engineering
 │   ├── README.md
+│   ├── check_dataset.py
 │   ├── data
 │   │   ├── processed
 │   │   └── raw
@@ -121,19 +134,24 @@
 │   │   ├── processed
 │   │   └── raw
 │   ├── figures
+│   │   ├── actual_vs_predicted.png
 │   │   ├── feature_importance.png
 │   │   ├── model_comparison.png
+│   │   ├── residual_distribution.png
 │   │   └── residual_plot.png
 │   ├── models
+│   │   ├── best_model.pkl
 │   │   ├── linear_regression_model.pkl
-│   │   └── random_forest_model.pkl
+│   │   ├── random_forest_model.pkl
+│   │   └── scaler.pkl
 │   ├── notebooks
 │   │   └── weather_model_baseline.ipynb
 │   └── src
-│       ├── (baseline testing)train.py
+│       ├── (for_baseline_testing)train.py
 │       ├── compare_models.py
 │       ├── config.py
 │       ├── evaluate.py
+│       ├── main.py
 │       └── predict.py
 └── w9_ml_pipeline
     ├── README.md
@@ -153,4 +171,4 @@
         ├── save_predictions.py
         └── upload_to_minio.py
 
-62 directories, 92 files
+57 directories, 115 files

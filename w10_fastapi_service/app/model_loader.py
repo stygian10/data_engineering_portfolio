@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 # --------------------------------------------------------
 
 DOCKER_MODEL_PATH = Path(
-    "/app/w8_weather_prediction_model/models/linear_regression_model.pkl"
+    "/workspace/w8_weather_prediction_model/models/linear_regression_model.pkl"
 )
 
 LOCAL_MODEL_PATH = (
@@ -21,7 +21,7 @@ LOCAL_MODEL_PATH = (
 )
 
 DOCKER_SCALER_PATH = Path(
-    "/app/w8_weather_prediction_model/models/scaler.pkl"
+    "/workspace/w8_weather_prediction_model/models/scaler.pkl"
 )
 
 LOCAL_SCALER_PATH = (

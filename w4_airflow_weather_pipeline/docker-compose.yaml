@@ -204,7 +204,7 @@ services:
 
     container_name: fastapi
 
-    working_dir: /app
+    working_dir: /workspace/w10_fastapi_service
 
     command: >
       uvicorn app.main:app
@@ -215,10 +215,7 @@ services:
       - "8000:8000"
 
     volumes:
-      - ../w10_fastapi_service:/app
-      - ../w7_feature_engineering:/app/w7_feature_engineering
-      - ../w8_weather_prediction_model:/app/w8_weather_prediction_model
-      - ../w9_ml_pipeline:/app/w9_ml_pipeline
+      - ..:/workspace
 
     environment:
       PYTHONUNBUFFERED: "1"
@@ -231,13 +228,14 @@ services:
 
     restart: always
 
+
   prediction-dashboard:
 
     build: ../w10_fastapi_service
 
     container_name: prediction-dashboard
 
-    working_dir: /app
+    working_dir: /workspace/w10_fastapi_service
 
     command: python -m dashboard.app
 
@@ -245,10 +243,7 @@ services:
       - "8051:8051"
 
     volumes:
-      - ../w10_fastapi_service:/app
-      - ../w7_feature_engineering:/app/w7_feature_engineering
-      - ../w8_weather_prediction_model:/app/w8_weather_prediction_model
-      - ../w9_ml_pipeline:/app/w9_ml_pipeline
+      - ..:/workspace
 
     environment:
       PYTHONUNBUFFERED: "1"

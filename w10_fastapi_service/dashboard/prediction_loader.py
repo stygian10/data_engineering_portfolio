@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 # Prediction file locations
 
 DOCKER_PREDICTION_PATH = Path(
-    "/app/w9_ml_pipeline/data/predictions/weather_predictions.csv"
+    "/workspace/w9_ml_pipeline/data/predictions/weather_predictions.csv"
 )
 
 LOCAL_PREDICTION_PATH = (

@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 # Feature dataset paths
 
 DOCKER_FEATURE_PATH = Path(
-    "/app/w7_feature_engineering/data/processed/w7_features_final.parquet"
+    "/workspace/w7_feature_engineering/data/processed/w7_features_final.parquet"
 )
 
 LOCAL_FEATURE_PATH = (

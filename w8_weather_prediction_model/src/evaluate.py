@@ -1,8 +1,13 @@
 # W8 - MODEL EVALUATION SCRIPT
 # Goal:
-# Evaluate the trained regression model using
-# MAE, RMSE and R² metrics while generating
-# prediction and residual visualization plots.
+# Generate evaluation visualizations for the
+# selected model using the test dataset.
+#
+# This script:
+# - Loads the saved best model and scaler
+# - Recreates the test dataset
+# - Generates prediction visualizations
+# - Saves evaluation figures
 
 
 # IMPORT LIBRARIES
@@ -10,16 +15,9 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
-import json
 import joblib
 
-from datetime import datetime
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import (
-    mean_absolute_error,
-    mean_squared_error,
-    r2_score
-)
 
 from config import (
     DATA_PATH,
@@ -28,13 +26,13 @@ from config import (
     TEST_SIZE,
     BEST_MODEL_PATH,
     SCALER_PATH,
-    MODEL_METRICS_PATH,
     ACTUAL_VS_PREDICTED_FIGURE,
     RESIDUAL_DISTRIBUTION_FIGURE
 )
 
 
 # LOAD DATASET
+# Read the processed Week 7 feature dataset.
 
 
 print("Loading dataset...")
@@ -48,6 +46,7 @@ print(df.shape)
 
 
 # REMOVE MISSING VALUES
+# Remove incomplete records before evaluation.
 
 
 df = df.dropna()
@@ -57,6 +56,7 @@ print(df.shape)
 
 
 # PREPARE FEATURES & TARGET
+# Separate the input features from the target.
 
 
 X = df.drop(
@@ -76,6 +76,8 @@ print(y.shape)
 
 
 # TRAIN / TEST SPLIT
+# Recreate the same train/test split used
+# during model training.
 
 
 X_train, X_test, y_train, y_test = train_test_split(
@@ -92,6 +94,7 @@ print(f"X_test Shape : {X_test.shape}")
 
 
 # LOAD SCALER
+# Load the saved scaler used during training.
 
 
 print("\nLoading scaler...")
@@ -104,6 +107,7 @@ print("Scaler loaded successfully.")
 
 
 # SCALE FEATURES
+# Apply the saved scaler to numerical features.
 
 
 numerical_columns = X_train.select_dtypes(
@@ -122,83 +126,30 @@ X_test[numerical_columns] = scaler.transform(
 )
 
 
-# LOAD TRAINED MODEL
+# LOAD BEST MODEL
+# Load the selected model for evaluation.
 
 
-print("\nLoading trained model...")
+print("\nLoading best model...")
 
 model = joblib.load(
     BEST_MODEL_PATH
 )
 
-print("Model loaded successfully.")
+print("Best model loaded successfully.")
 
 
 # MAKE PREDICTIONS
+# Generate predictions using the saved model.
 
 
 predictions = model.predict(
     X_test
 )
 
-
-# EVALUATION METRICS
-
-
-mae = mean_absolute_error(
-    y_test,
-    predictions
-)
-
-mse = mean_squared_error(
-    y_test,
-    predictions
-)
-
-rmse = mse ** 0.5
-
-r2 = r2_score(
-    y_test,
-    predictions)
-
-
-print("\nMODEL PERFORMANCE")
-print("-" * 40)
-
-print(f"MAE  : {mae:.2f}")
-print(f"RMSE : {rmse:.2f}")
-print(f"R²   : {r2:.2f}")
-
-# SAVE MODEL METRICS
-
-
-metrics = {
-    "model_name": type(model).__name__,
-    "r2": round(r2, 4),
-    "rmse": round(rmse, 4),
-    "mae": round(mae, 4),
-    "training_rows": len(df),
-    "trained_at": datetime.now().strftime(
-        "%d %b %Y %H:%M")
-}
-
-with open(
-    MODEL_METRICS_PATH,
-    "w"
-) as file:
-
-    json.dump(
-        metrics,
-        file,
-        indent=4
-    )
-
-print(
-    f"\nModel metrics saved to "
-    f"{MODEL_METRICS_PATH}"
-)
-
 # ACTUAL VS PREDICTED PLOT
+# Compare the predicted values against
+# the actual target values.
 
 
 plt.figure(figsize=(8, 6))
@@ -224,10 +175,15 @@ plt.savefig(
 
 plt.close()
 
-print(f"\nSaved: {ACTUAL_VS_PREDICTED_FIGURE}")
+print(
+    f"\nSaved: "
+    f"{ACTUAL_VS_PREDICTED_FIGURE}"
+)
 
 
 # RESIDUAL DISTRIBUTION
+# Visualize the prediction errors to
+# assess model performance.
 
 
 residuals = (
@@ -258,7 +214,23 @@ plt.savefig(
 
 plt.close()
 
-print(f"Saved: {RESIDUAL_DISTRIBUTION_FIGURE}")
+print(
+    f"Saved: "
+    f"{RESIDUAL_DISTRIBUTION_FIGURE}"
+)
 
 
-print("\nEvaluation completed successfully.")
+# SUMMARY
+# Confirm that the evaluation figures
+# were generated successfully.
+
+
+print("\n" + "=" * 60)
+print("EVALUATION VISUALIZATIONS COMPLETED")
+print("=" * 60)
+
+print(f"Best Model               : {BEST_MODEL_PATH}")
+print(f"Actual vs Predicted Plot : {ACTUAL_VS_PREDICTED_FIGURE}")
+print(f"Residual Distribution    : {RESIDUAL_DISTRIBUTION_FIGURE}")
+
+print("\nWeek 8 evaluation completed successfully.")

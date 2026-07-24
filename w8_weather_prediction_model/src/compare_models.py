@@ -1,13 +1,21 @@
 # W8 - MODEL COMPARISON SCRIPT
-# Purpose: Compare Linear Regression vs Random Forest Regressor
-#
-# Outputs:
-# - MAE
-# - RMSE
-# - R² Score
-# - Model Comparison Plot
-# - Feature Importance Plot
-# - Residual Comparison Plot
+# Goal: Train multiple regression models, compare their
+# performance, select the best model, and save all
+# artifacts required for prediction and deployment.
+#===================================================
+# This script:
+# Loads and preprocesses the Week 7 feature dataset
+# Splits the data into training and testing sets
+# Scales numerical features
+# Trains Linear Regression and Random Forest models
+# Evaluates both models using MAE, RMSE and R²
+# Compares model performance
+# Selects and saves the best-performing model
+# Saves the trained models and scaler
+# Generates evaluation figures
+# Stores model metrics for the dashboard and API
+import json
+from datetime import datetime
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -34,6 +42,7 @@ from config import (
     RANDOM_FOREST_MODEL_PATH,
     BEST_MODEL_PATH,
     SCALER_PATH,
+    MODEL_METRICS_PATH,
     MODEL_COMPARISON_FIGURE,
     FEATURE_IMPORTANCE_FIGURE,
     RESIDUAL_COMPARISON_FIGURE
@@ -41,7 +50,6 @@ from config import (
 
 
 # LOAD DATASET
-
 
 print("Loading dataset...")
 
@@ -55,7 +63,6 @@ print(df.head())
 
 
 # PREPARE FEATURES & TARGET
-
 
 print("\nPreparing dataset...")
 
@@ -98,7 +105,6 @@ print("y_test Shape :", y_test.shape)
 
 # SCALE FEATURES
 
-
 print("\nScaling numerical features...")
 
 scaler = StandardScaler()
@@ -124,7 +130,6 @@ joblib.dump(
 )
 
 print(f"Scaler saved to: {SCALER_PATH}")
-
 
 # TRAIN LINEAR REGRESSION
 
@@ -166,6 +171,7 @@ rf_predictions = rf_model.predict(
 )
 
 print("Random Forest Training Complete")
+
 
 # EVALUATION FUNCTION
 
@@ -411,6 +417,10 @@ if rf_metrics[2] > linear_metrics[2]:
     model_name = "Random Forest"
     best_model_path = RANDOM_FOREST_MODEL_PATH
 
+    best_mae = rf_metrics[0]
+    best_rmse = rf_metrics[1]
+    best_r2 = rf_metrics[2]
+
     print("\nSelected Model: Random Forest")
 
     print(
@@ -425,6 +435,10 @@ else:
     best_model = linear_model
     model_name = "Linear Regression"
     best_model_path = LINEAR_MODEL_PATH
+
+    best_mae = linear_metrics[0]
+    best_rmse = linear_metrics[1]
+    best_r2 = linear_metrics[2]
 
     print("\nSelected Model: Linear Regression")
 
@@ -473,6 +487,35 @@ print(
 )
 
 
+# SAVE MODEL METRICS
+
+metrics = {
+    "model_name": model_name,
+    "r2": round(best_r2, 4),
+    "rmse": round(best_rmse, 4),
+    "mae": round(best_mae, 4),
+    "training_rows": len(df),
+    "trained_at": datetime.now().strftime(
+        "%d %b %Y %H:%M"
+    )
+}
+
+with open(
+    MODEL_METRICS_PATH,
+    "w" 
+) as file:
+
+    json.dump(
+        metrics,
+        file,
+        indent=4
+    )
+
+print(
+    f"\nModel metrics saved to:\n"
+    f"{MODEL_METRICS_PATH}"
+)
+
 # SUMMARY
 
 
@@ -508,6 +551,7 @@ print(f"Linear Model       : {LINEAR_MODEL_PATH}")
 print(f"Random Forest      : {RANDOM_FOREST_MODEL_PATH}")
 print(f"Best Model         : {BEST_MODEL_PATH}")
 print(f"Scaler             : {SCALER_PATH}")
+print(f"Model Metrics      : {MODEL_METRICS_PATH}")
 
 print("\nGenerated Figures")
 
@@ -516,3 +560,4 @@ print(f"Feature Importance : {FEATURE_IMPORTANCE_FIGURE}")
 print(f"Residual Plot      : {RESIDUAL_COMPARISON_FIGURE}")
 
 print("\nWeek 8 model comparison completed successfully.")
+

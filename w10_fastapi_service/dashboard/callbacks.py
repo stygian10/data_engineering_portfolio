@@ -82,11 +82,13 @@ def register_callbacks(app):
     )
     def populate_city_dropdowns(_):
         """
-        Populate both dashboard city dropdowns.
+        Populate dashboard city dropdowns.
         """
 
+        feature_data = load_live_prediction_data()
+
         cities = get_available_cities(
-            FEATURE_DATA
+            feature_data
         )
 
         options = [
@@ -148,8 +150,10 @@ def register_callbacks(app):
 
         # Get latest feature record
 
+        feature_data = load_live_prediction_data()
+
         record = get_latest_record(
-            FEATURE_DATA,
+            feature_data,
             city,
         )
 
@@ -260,14 +264,12 @@ def register_callbacks(app):
         # Filter prediction dataset
         # ----------------------------------------
 
+        prediction_data = load_prediction_data()
+
         filtered_df = filter_prediction_data(
-
-            PREDICTION_DATA,
-
+            prediction_data,
             city,
-
             selected_date,
-
         )
 
         if filtered_df.empty:

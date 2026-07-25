@@ -26,7 +26,7 @@ x-airflow-common: &airflow-common
     W2_DATA_FILE: /opt/airflow/w2/data/processed/weather_ready_for_postgres.csv
     W7_FEATURE_DATA_PATH: /opt/airflow/w7/data/processed/w7_features_final.parquet
 
-    MINIO_ENDPOINT: minio:9000
+    MINIO_ENDPOINT: weather-minio:9000
 
     PYTHONPATH: /opt/airflow
 
@@ -52,6 +52,7 @@ services:
 
   postgres:
     image: postgres:16
+    container_name: weather-postgres
 
     environment:
       POSTGRES_USER: airflow
@@ -72,7 +73,7 @@ services:
   minio:
     image: minio/minio
 
-    container_name: minio
+    container_name: weather-minio
 
     command: server /data --console-address ":9001"
 
@@ -90,6 +91,7 @@ services:
     restart: always
 
   airflow-init:
+    container_name: weather-airflow-init
 
     <<: *airflow-common
 
@@ -115,6 +117,7 @@ services:
     restart: "no"
 
   airflow-apiserver:
+    container_name: weather-airflow-api
 
     <<: *airflow-common
 
@@ -136,6 +139,7 @@ services:
     restart: always
 
   airflow-scheduler:
+    container_name: weather-airflow-scheduler
 
     <<: *airflow-common
 
@@ -155,6 +159,7 @@ services:
     restart: always
 
   airflow-dag-processor:
+    container_name: weather-airflow-dag-processor
 
     <<: *airflow-common
 
@@ -179,7 +184,7 @@ services:
   dashboard:
     build: ../w6_dashboard_minio
 
-    container_name: dashboard
+    container_name: weather-dashboard-w6
 
     ports:
       - "8050:8050"
@@ -188,7 +193,7 @@ services:
       - ../w6_dashboard_minio:/app
 
     environment:
-      MINIO_ENDPOINT: minio:9000
+      MINIO_ENDPOINT: weather-minio:9000
 
     depends_on:
       minio:
@@ -202,7 +207,7 @@ services:
 
     build: ../w10_fastapi_service
 
-    container_name: fastapi
+    container_name: weather-fastapi-w10
 
     working_dir: /workspace/w10_fastapi_service
 
@@ -233,7 +238,7 @@ services:
 
     build: ../w10_fastapi_service
 
-    container_name: prediction-dashboard
+    container_name: weather-prediction-dashboard-w10
 
     working_dir: /workspace/w10_fastapi_service
 
@@ -247,7 +252,7 @@ services:
 
     environment:
       PYTHONUNBUFFERED: "1"
-      FASTAPI_URL: http://fastapi:8000
+      FASTAPI_URL: http://weather-api:8000
 
     depends_on:
       fastapi:

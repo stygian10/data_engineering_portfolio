@@ -234,3 +234,5 @@ logs/
 # Dash / Plotly cache
 # ---------------------------------------
 assets/.cache/
+
+docker-compose.resolved.yml

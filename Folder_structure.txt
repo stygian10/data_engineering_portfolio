@@ -118,15 +118,15 @@
 │       └── upload_to_minio.py
 ├── w7_feature_engineering
 │   ├── README.md
-│   ├── check_dataset.py
 │   ├── data
 │   │   ├── processed
 │   │   └── raw
-│   └── src
-│       ├── config.py
-│       ├── features.py
-│       ├── load_data.py
-│       └── main.py
+│   ├── src
+│   │   ├── config.py
+│   │   ├── features.py
+│   │   ├── load_data.py
+│   │   └── main.py
+│   └── test_check_dataset.py
 ├── w8_weather_prediction_model
 │   ├── README.md
 │   ├── data
@@ -144,8 +144,6 @@
 │   │   ├── model_metrics.json
 │   │   ├── random_forest_model.pkl
 │   │   └── scaler.pkl
-│   ├── notebooks
-│   │   └── weather_model_baseline.ipynb
 │   └── src
 │       ├── compare_models.py
 │       ├── config.py
@@ -171,4 +169,4 @@
 │       └── upload_to_minio.py
 └── workflow.md
 
-55 directories, 117 files
+54 directories, 116 files

@@ -12,9 +12,9 @@ from src.config import (
     TABLE_NAME,
 )
 
-# ==========================================================
+
 # PROJECT PATHS
-# ==========================================================
+
 
 W1_DIR = Path("/opt/airflow/w1")
 W2_DIR = Path("/opt/airflow/w2")
@@ -30,9 +30,9 @@ print(f"HISTORICAL_DATASET : {HISTORICAL_DATASET}")
 print("================================\n")
 
 
-# ==========================================================
+
 # DATASET CHECK
-# ==========================================================
+
 
 def dataset_exists():
     """
@@ -45,9 +45,9 @@ def dataset_exists():
     return any(HISTORICAL_DATASET.iterdir())
 
 
-# ==========================================================
+
 # DATABASE
-# ==========================================================
+
 
 def get_connection():
 
@@ -102,9 +102,9 @@ def latest_historical_date():
     return latest
 
 
-# ==========================================================
+
 # DATE CHECK
-# ==========================================================
+
 
 def historical_up_to_date():
 
@@ -118,9 +118,9 @@ def historical_up_to_date():
     return latest.date() >= expected
 
 
-# ==========================================================
+
 # RECOVERY COMMANDS
-# ==========================================================
+
 
 def run_week1():
 
@@ -155,9 +155,9 @@ def run_week3():
     )
 
 
-# ==========================================================
+
 # BRANCH DECISION
-# ==========================================================
+
 
 def determine_pipeline_branch():
 
@@ -208,9 +208,9 @@ def determine_pipeline_branch():
     return "skip_recovery"
 
 
-# ==========================================================
+
 # AIRFLOW TASK FUNCTIONS
-# ==========================================================
+
 
 def run_w1_w2_w3():
 

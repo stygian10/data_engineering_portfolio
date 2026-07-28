@@ -5,9 +5,9 @@ import joblib
 
 logging.basicConfig(level=logging.INFO)
 
-# --------------------------------------------------------
+
 # Model paths
-# --------------------------------------------------------
+
 
 DOCKER_MODEL_PATH = Path(
     "/workspace/w8_weather_prediction_model/models/linear_regression_model.pkl"
@@ -31,9 +31,9 @@ LOCAL_SCALER_PATH = (
     / "scaler.pkl"
 )
 
-# --------------------------------------------------------
+
 # Detect execution environment
-# --------------------------------------------------------
+
 
 if DOCKER_MODEL_PATH.is_file():
 
@@ -52,9 +52,9 @@ else:
 logging.info(f"Model Path: {MODEL_PATH}")
 logging.info(f"Scaler Path: {SCALER_PATH}")
 
-# --------------------------------------------------------
+
 # Cache loaded objects
-# --------------------------------------------------------
+
 
 _model = None
 _scaler = None

@@ -50,9 +50,9 @@ with DAG(
     ],
 ) as dag:
 
-    # ==========================================================
+    
     # PIPELINE STATE CHECK
-    # ==========================================================
+    
 
     @task.branch(task_id="check_pipeline_state")
     def check_pipeline_state():
@@ -62,9 +62,9 @@ with DAG(
     pipeline_check = check_pipeline_state()
 
 
-    # ==========================================================
+    
     # CREATE POSTGRES TABLE
-    # ==========================================================
+    
 
     create_table_task = PythonOperator(
         task_id="create_postgresql_table",
@@ -72,9 +72,9 @@ with DAG(
     )
 
 
-    # ==========================================================
+    
     # RECOVERY TASKS
-    # ==========================================================
+    
 
     run_all_recovery = PythonOperator(
         task_id="run_w1_w2_w3",
@@ -96,9 +96,9 @@ with DAG(
     )
 
 
-    # ==========================================================
+    
     # WEEK 4
-    # ==========================================================
+    
 
     cleanup_task = PythonOperator(
         task_id="cleanup_generated_files",
@@ -126,9 +126,9 @@ with DAG(
     )
 
 
-    # ==========================================================
+    
     # WEEK 5
-    # ==========================================================
+    
 
     spark_task = BashOperator(
         task_id="run_spark_etl",
@@ -138,9 +138,9 @@ with DAG(
         python -m weather_etl.main
         """,
     )
-        # ==========================================================
+        
     # WEEK 6
-    # ==========================================================
+    
 
     upload_to_minio_task = BashOperator(
         task_id="upload_to_minio",
@@ -151,9 +151,9 @@ with DAG(
         """,
     )
 
-    # ==========================================================
+    
     # WEEK 7
-    # ==========================================================
+    
 
     feature_engineering_task = BashOperator(
         task_id="run_feature_engineering",
@@ -164,9 +164,9 @@ with DAG(
         """,
     )
 
-    # ==========================================================
+    
     # WEEK 8
-    # ==========================================================
+    
 
     model_training_task = BashOperator(
         task_id="run_model_training",
@@ -177,9 +177,9 @@ with DAG(
         """,
     )
 
-    # ==========================================================
+    
     # WEEK 9
-    # ==========================================================
+    
 
     prediction_pipeline_task = BashOperator(
         task_id="run_prediction_pipeline",
@@ -199,18 +199,18 @@ with DAG(
         """,
     )
 
-    # ==========================================================
+    
     # END
-    # ==========================================================
+    
 
     end_task = PythonOperator(
         task_id="end_pipeline",
         python_callable=end_pipeline,
     )
 
-    # ==========================================================
+    
     # PIPELINE FLOW
-    # ==========================================================
+    
 
     create_table_task >> pipeline_check
 

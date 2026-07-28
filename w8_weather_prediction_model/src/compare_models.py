@@ -16,6 +16,7 @@
 # Stores model metrics for the dashboard and API
 import json
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -495,7 +496,9 @@ metrics = {
     "rmse": round(best_rmse, 4),
     "mae": round(best_mae, 4),
     "training_rows": len(df),
-    "trained_at": datetime.now().strftime(
+    "trained_at": datetime.now(
+        ZoneInfo("Europe/London")
+    ).strftime(
         "%d %b %Y %H:%M"
     )
 }

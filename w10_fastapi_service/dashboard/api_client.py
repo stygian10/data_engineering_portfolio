@@ -1,4 +1,5 @@
 import logging
+import os
 
 import requests
 
@@ -6,9 +7,13 @@ import requests
 logging.basicConfig(level=logging.INFO)
 
 
-# FastAPI endpoint
+# FastAPI configuration
+FASTAPI_URL = os.getenv(
+    "FASTAPI_URL",
+    "http://fastapi:8000",
+)
 
-API_URL = "http://fastapi:8000/predict"
+API_URL = f"{FASTAPI_URL}/predict"
 
 
 def request_prediction(payload):
@@ -83,7 +88,7 @@ def check_api_health():
     try:
 
         response = requests.get(
-            "http://fastapi:8000/",
+            FASTAPI_URL,
             timeout=5,
         )
 

@@ -1,0 +1,270 @@
+x-airflow-common: &airflow-common
+  build: ./w4_airflow_weather_pipeline
+  image: airflow-custom:latest
+
+  environment: &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__FERNET_KEY: ""
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+
+    AIRFLOW__API_AUTH__JWT_SECRET: airflow_jwt_secret
+    AIRFLOW__API_AUTH__JWT_ISSUER: airflow
+
+    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
+
+    DB_HOST: postgres
+    DB_PORT: 5432
+    DB_NAME: airflow
+    DB_USER: airflow
+    DB_PASSWORD: airflow
+
+    W2_DATA_FILE: /opt/airflow/w2/data/processed/weather_ready_for_postgres.csv
+    W7_FEATURE_DATA_PATH: /opt/airflow/w7/data/processed/w7_features_final.parquet
+
+    MINIO_ENDPOINT: weather-minio:9000
+
+    PYTHONPATH: /opt/airflow
+
+  volumes:
+    - ./w4_airflow_weather_pipeline/dags:/opt/airflow/dags
+    - ./w4_airflow_weather_pipeline/src:/opt/airflow/src
+    - ./w4_airflow_weather_pipeline/logs:/opt/airflow/logs
+    - ./w4_airflow_weather_pipeline/plugins:/opt/airflow/plugins
+    - ./w4_airflow_weather_pipeline/config:/opt/airflow/config
+    - ./w4_airflow_weather_pipeline/data:/opt/airflow/data
+
+    - ./w1_weather_data_cleaner:/opt/airflow/w1
+    - ./w2_weather_etl_pipeline:/opt/airflow/w2
+    - ./w3_postgresql_loader:/opt/airflow/w3
+    - ./w5_spark_weather_etl:/opt/airflow/w5
+    - ./w6_dashboard_minio:/opt/airflow/w6
+    - ./w7_feature_engineering:/opt/airflow/w7
+    - ./w8_weather_prediction_model:/opt/airflow/w8
+    - ./w9_ml_pipeline:/opt/airflow/w9
+    - ./w10_fastapi_service:/opt/airflow/w10
+
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: weather-postgres
+
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+
+    restart: always
+
+  minio:
+    image: minio/minio
+
+    container_name: weather-minio
+
+    command: server /data --console-address ":9001"
+
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+
+    volumes:
+      - minio-data:/data
+
+    restart: always
+
+  airflow-init:
+    container_name: weather-airflow-init
+
+    <<: *airflow-common
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    entrypoint: /bin/bash
+
+    command:
+      - -c
+      - |
+        airflow db migrate
+
+        airflow users create \
+          --username admin \
+          --firstname admin \
+          --lastname user \
+          --role Admin \
+          --email admin@email.com \
+          --password admin || true
+
+    restart: "no"
+
+  airflow-apiserver:
+    container_name: weather-airflow-api
+
+    <<: *airflow-common
+
+    command: api-server
+
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/api/v2/monitor/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+    restart: always
+
+  airflow-scheduler:
+    container_name: weather-airflow-scheduler
+
+    <<: *airflow-common
+
+    command: scheduler
+
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "airflow jobs check --job-type SchedulerJob --hostname $$HOSTNAME"
+        ]
+
+    restart: always
+
+  airflow-dag-processor:
+    container_name: weather-airflow-dag-processor
+
+    <<: *airflow-common
+
+    command: dag-processor
+
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "airflow jobs check --job-type DagProcessorJob --hostname $$HOSTNAME"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+    restart: always
+
+  dashboard:
+    build: ./w6_dashboard_minio
+
+    container_name: weather-dashboard-w6
+
+    working_dir: /workspace/w6_dashboard_minio
+
+    ports:
+      - "8050:8050"
+
+    volumes:
+      - .:/workspace
+
+    environment:
+      MINIO_ENDPOINT: weather-minio:9000
+
+    depends_on:
+      minio:
+        condition: service_started
+
+    command: python -m src.app
+
+    restart: always
+
+  fastapi:
+
+    build: ./w10_fastapi_service
+
+    container_name: weather-fastapi-w10
+
+    working_dir: /workspace/w10_fastapi_service
+
+    command: >
+      uvicorn app.main:app
+      --host 0.0.0.0
+      --port 8000
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - .:/workspace
+
+
+    environment:
+      PYTHONUNBUFFERED: "1"
+
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+    restart: always
+
+
+  prediction-dashboard:
+
+    build: ./w10_fastapi_service
+
+    container_name: weather-prediction-dashboard-w10
+
+    working_dir: /workspace/w10_fastapi_service
+
+    command: python -m dashboard.app
+
+    ports:
+      - "8051:8051"
+
+    volumes:
+      - .:/workspace
+
+    environment:
+      PYTHONUNBUFFERED: "1"
+      FASTAPI_URL: http://fastapi:8000
+
+    depends_on:
+      fastapi:
+        condition: service_started
+
+    restart: always
+
+volumes:
+
+  postgres-db-volume:
+
+  minio-data:

@@ -1,0 +1,618 @@
+name: data_engineering_portfolio
+services:
+  airflow-apiserver:
+    build:
+      context: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline
+      dockerfile: Dockerfile
+    command:
+      - api-server
+    container_name: weather-airflow-api
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+        required: true
+    environment:
+      AIRFLOW__API_AUTH__JWT_ISSUER: airflow
+      AIRFLOW__API_AUTH__JWT_SECRET: airflow_jwt_secret
+      AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__FERNET_KEY: ""
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
+      DB_HOST: postgres
+      DB_NAME: airflow
+      DB_PASSWORD: airflow
+      DB_PORT: "5432"
+      DB_USER: airflow
+      MINIO_ENDPOINT: weather-minio:9000
+      PYTHONPATH: /opt/airflow
+      W2_DATA_FILE: /opt/airflow/w2/data/processed/weather_ready_for_postgres.csv
+      W7_FEATURE_DATA_PATH: /opt/airflow/w7/data/processed/w7_features_final.parquet
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - --fail
+        - http://localhost:8080/api/v2/monitor/health
+      timeout: 10s
+      interval: 30s
+      retries: 5
+    image: airflow-custom:latest
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8080
+        published: "8080"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/dags
+        target: /opt/airflow/dags
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/src
+        target: /opt/airflow/src
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/logs
+        target: /opt/airflow/logs
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/plugins
+        target: /opt/airflow/plugins
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/config
+        target: /opt/airflow/config
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/data
+        target: /opt/airflow/data
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w1_weather_data_cleaner
+        target: /opt/airflow/w1
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w2_weather_etl_pipeline
+        target: /opt/airflow/w2
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w3_postgresql_loader
+        target: /opt/airflow/w3
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w5_spark_weather_etl
+        target: /opt/airflow/w5
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w6_dashboard_minio
+        target: /opt/airflow/w6
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w7_feature_engineering
+        target: /opt/airflow/w7
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w8_weather_prediction_model
+        target: /opt/airflow/w8
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w9_ml_pipeline
+        target: /opt/airflow/w9
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w10_fastapi_service
+        target: /opt/airflow/w10
+        bind: {}
+  airflow-dag-processor:
+    build:
+      context: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline
+      dockerfile: Dockerfile
+    command:
+      - dag-processor
+    container_name: weather-airflow-dag-processor
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+        required: true
+    environment:
+      AIRFLOW__API_AUTH__JWT_ISSUER: airflow
+      AIRFLOW__API_AUTH__JWT_SECRET: airflow_jwt_secret
+      AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__FERNET_KEY: ""
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
+      DB_HOST: postgres
+      DB_NAME: airflow
+      DB_PASSWORD: airflow
+      DB_PORT: "5432"
+      DB_USER: airflow
+      MINIO_ENDPOINT: weather-minio:9000
+      PYTHONPATH: /opt/airflow
+      W2_DATA_FILE: /opt/airflow/w2/data/processed/weather_ready_for_postgres.csv
+      W7_FEATURE_DATA_PATH: /opt/airflow/w7/data/processed/w7_features_final.parquet
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - airflow jobs check --job-type DagProcessorJob --hostname $$HOSTNAME
+      timeout: 10s
+      interval: 30s
+      retries: 5
+    image: airflow-custom:latest
+    networks:
+      default: null
+    restart: always
+    volumes:
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/dags
+        target: /opt/airflow/dags
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/src
+        target: /opt/airflow/src
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/logs
+        target: /opt/airflow/logs
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/plugins
+        target: /opt/airflow/plugins
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/config
+        target: /opt/airflow/config
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/data
+        target: /opt/airflow/data
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w1_weather_data_cleaner
+        target: /opt/airflow/w1
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w2_weather_etl_pipeline
+        target: /opt/airflow/w2
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w3_postgresql_loader
+        target: /opt/airflow/w3
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w5_spark_weather_etl
+        target: /opt/airflow/w5
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w6_dashboard_minio
+        target: /opt/airflow/w6
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w7_feature_engineering
+        target: /opt/airflow/w7
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w8_weather_prediction_model
+        target: /opt/airflow/w8
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w9_ml_pipeline
+        target: /opt/airflow/w9
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w10_fastapi_service
+        target: /opt/airflow/w10
+        bind: {}
+  airflow-init:
+    build:
+      context: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline
+      dockerfile: Dockerfile
+    command:
+      - -c
+      - |
+        airflow db migrate
+
+        airflow users create \
+          --username admin \
+          --firstname admin \
+          --lastname user \
+          --role Admin \
+          --email admin@email.com \
+          --password admin || true
+    container_name: weather-airflow-init
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    entrypoint:
+      - /bin/bash
+    environment:
+      AIRFLOW__API_AUTH__JWT_ISSUER: airflow
+      AIRFLOW__API_AUTH__JWT_SECRET: airflow_jwt_secret
+      AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__FERNET_KEY: ""
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
+      DB_HOST: postgres
+      DB_NAME: airflow
+      DB_PASSWORD: airflow
+      DB_PORT: "5432"
+      DB_USER: airflow
+      MINIO_ENDPOINT: weather-minio:9000
+      PYTHONPATH: /opt/airflow
+      W2_DATA_FILE: /opt/airflow/w2/data/processed/weather_ready_for_postgres.csv
+      W7_FEATURE_DATA_PATH: /opt/airflow/w7/data/processed/w7_features_final.parquet
+    image: airflow-custom:latest
+    networks:
+      default: null
+    restart: "no"
+    volumes:
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/dags
+        target: /opt/airflow/dags
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/src
+        target: /opt/airflow/src
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/logs
+        target: /opt/airflow/logs
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/plugins
+        target: /opt/airflow/plugins
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/config
+        target: /opt/airflow/config
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/data
+        target: /opt/airflow/data
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w1_weather_data_cleaner
+        target: /opt/airflow/w1
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w2_weather_etl_pipeline
+        target: /opt/airflow/w2
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w3_postgresql_loader
+        target: /opt/airflow/w3
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w5_spark_weather_etl
+        target: /opt/airflow/w5
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w6_dashboard_minio
+        target: /opt/airflow/w6
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w7_feature_engineering
+        target: /opt/airflow/w7
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w8_weather_prediction_model
+        target: /opt/airflow/w8
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w9_ml_pipeline
+        target: /opt/airflow/w9
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w10_fastapi_service
+        target: /opt/airflow/w10
+        bind: {}
+  airflow-scheduler:
+    build:
+      context: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline
+      dockerfile: Dockerfile
+    command:
+      - scheduler
+    container_name: weather-airflow-scheduler
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+        required: true
+    environment:
+      AIRFLOW__API_AUTH__JWT_ISSUER: airflow
+      AIRFLOW__API_AUTH__JWT_SECRET: airflow_jwt_secret
+      AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__FERNET_KEY: ""
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
+      DB_HOST: postgres
+      DB_NAME: airflow
+      DB_PASSWORD: airflow
+      DB_PORT: "5432"
+      DB_USER: airflow
+      MINIO_ENDPOINT: weather-minio:9000
+      PYTHONPATH: /opt/airflow
+      W2_DATA_FILE: /opt/airflow/w2/data/processed/weather_ready_for_postgres.csv
+      W7_FEATURE_DATA_PATH: /opt/airflow/w7/data/processed/w7_features_final.parquet
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - airflow jobs check --job-type SchedulerJob --hostname $$HOSTNAME
+    image: airflow-custom:latest
+    networks:
+      default: null
+    restart: always
+    volumes:
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/dags
+        target: /opt/airflow/dags
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/src
+        target: /opt/airflow/src
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/logs
+        target: /opt/airflow/logs
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/plugins
+        target: /opt/airflow/plugins
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/config
+        target: /opt/airflow/config
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w4_airflow_weather_pipeline/data
+        target: /opt/airflow/data
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w1_weather_data_cleaner
+        target: /opt/airflow/w1
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w2_weather_etl_pipeline
+        target: /opt/airflow/w2
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w3_postgresql_loader
+        target: /opt/airflow/w3
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w5_spark_weather_etl
+        target: /opt/airflow/w5
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w6_dashboard_minio
+        target: /opt/airflow/w6
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w7_feature_engineering
+        target: /opt/airflow/w7
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w8_weather_prediction_model
+        target: /opt/airflow/w8
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w9_ml_pipeline
+        target: /opt/airflow/w9
+        bind: {}
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w10_fastapi_service
+        target: /opt/airflow/w10
+        bind: {}
+  dashboard:
+    build:
+      context: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w6_dashboard_minio
+      dockerfile: Dockerfile
+    command:
+      - python
+      - -m
+      - src.app
+    container_name: weather-dashboard-w6
+    depends_on:
+      minio:
+        condition: service_started
+        required: true
+    environment:
+      MINIO_ENDPOINT: weather-minio:9000
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8050
+        published: "8050"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio
+        target: /workspace
+        bind: {}
+    working_dir: /workspace/w6_dashboard_minio
+  fastapi:
+    build:
+      context: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w10_fastapi_service
+      dockerfile: Dockerfile
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+    container_name: weather-fastapi-w10
+    environment:
+      PYTHONUNBUFFERED: "1"
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - --fail
+        - http://localhost:8000/
+      timeout: 10s
+      interval: 30s
+      retries: 5
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8000
+        published: "8000"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio
+        target: /workspace
+        bind: {}
+    working_dir: /workspace/w10_fastapi_service
+  minio:
+    command:
+      - server
+      - /data
+      - --console-address
+      - :9001
+    container_name: weather-minio
+    environment:
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: minioadmin
+    image: minio/minio
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 9000
+        published: "9000"
+        protocol: tcp
+      - mode: ingress
+        target: 9001
+        published: "9001"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: volume
+        source: minio-data
+        target: /data
+        volume: {}
+  postgres:
+    container_name: weather-postgres
+    environment:
+      POSTGRES_DB: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_USER: airflow
+    healthcheck:
+      test:
+        - CMD
+        - pg_isready
+        - -U
+        - airflow
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    image: postgres:16
+    networks:
+      default: null
+    restart: always
+    volumes:
+      - type: volume
+        source: postgres-db-volume
+        target: /var/lib/postgresql/data
+        volume: {}
+  prediction-dashboard:
+    build:
+      context: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w10_fastapi_service
+      dockerfile: Dockerfile
+    command:
+      - python
+      - -m
+      - dashboard.app
+    container_name: weather-prediction-dashboard-w10
+    depends_on:
+      fastapi:
+        condition: service_started
+        required: true
+    environment:
+      FASTAPI_URL: http://fastapi:8000
+      PYTHONUNBUFFERED: "1"
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8051
+        published: "8051"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: bind
+        source: /Users/gaurav/Documents/Projects/data_engineering_portfolio
+        target: /workspace
+        bind: {}
+    working_dir: /workspace/w10_fastapi_service
+networks:
+  default:
+    name: data_engineering_portfolio_default
+volumes:
+  minio-data:
+    name: data_engineering_portfolio_minio-data
+  postgres-db-volume:
+    name: data_engineering_portfolio_postgres-db-volume
+x-airflow-common:
+  build: ./w4_airflow_weather_pipeline
+  environment:
+    AIRFLOW__API_AUTH__JWT_ISSUER: airflow
+    AIRFLOW__API_AUTH__JWT_SECRET: airflow_jwt_secret
+    AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__FERNET_KEY: ""
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
+    DB_HOST: postgres
+    DB_NAME: airflow
+    DB_PASSWORD: airflow
+    DB_PORT: 5432
+    DB_USER: airflow
+    MINIO_ENDPOINT: weather-minio:9000
+    PYTHONPATH: /opt/airflow
+    W2_DATA_FILE: /opt/airflow/w2/data/processed/weather_ready_for_postgres.csv
+    W7_FEATURE_DATA_PATH: /opt/airflow/w7/data/processed/w7_features_final.parquet
+  image: airflow-custom:latest
+  volumes:
+    - ./w4_airflow_weather_pipeline/dags:/opt/airflow/dags
+    - ./w4_airflow_weather_pipeline/src:/opt/airflow/src
+    - ./w4_airflow_weather_pipeline/logs:/opt/airflow/logs
+    - ./w4_airflow_weather_pipeline/plugins:/opt/airflow/plugins
+    - ./w4_airflow_weather_pipeline/config:/opt/airflow/config
+    - ./w4_airflow_weather_pipeline/data:/opt/airflow/data
+    - ./w1_weather_data_cleaner:/opt/airflow/w1
+    - ./w2_weather_etl_pipeline:/opt/airflow/w2
+    - ./w3_postgresql_loader:/opt/airflow/w3
+    - ./w5_spark_weather_etl:/opt/airflow/w5
+    - ./w6_dashboard_minio:/opt/airflow/w6
+    - ./w7_feature_engineering:/opt/airflow/w7
+    - ./w8_weather_prediction_model:/opt/airflow/w8
+    - ./w9_ml_pipeline:/opt/airflow/w9
+    - ./w10_fastapi_service:/opt/airflow/w10

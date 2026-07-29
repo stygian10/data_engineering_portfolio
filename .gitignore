@@ -184,12 +184,10 @@ venv/
 *.crc
 *.tmp
 # Ignore parquet outputs
-*.parquet
 # ---------------------------
 # RAW / PROCESSED DATA
 # ---------------------------
 **/data/raw/
-**/data/processed/
 
 # ---------------------------
 # SPARK FILES

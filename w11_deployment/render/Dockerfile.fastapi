@@ -13,13 +13,12 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY w7_feature_engineering ./w7_feature_engineering
 COPY w8_weather_prediction_model ./w8_weather_prediction_model
 COPY w9_ml_pipeline ./w9_ml_pipeline
 COPY w10_fastapi_service ./w10_fastapi_service
 
 WORKDIR /workspace/w10_fastapi_service
 
-EXPOSE 8051
+EXPOSE 8000
 
-CMD ["python", "-m", "dashboard.app"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

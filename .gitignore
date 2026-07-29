@@ -234,3 +234,7 @@ logs/
 assets/.cache/
 
 docker-compose.resolved.yml
+w6_dashboard_minio/data/weather_week5.parquet/part-00000-33a7f566-465d-4262-aaf3-e9e65be54b5e-c000.snappy.parquet
+w5_spark_weather_etl/data/processed/weather_week5.parquet/_SUCCESS
+w5_spark_weather_etl/data/processed/weather_week5.parquet/part-00000-12b29a2f-7c5b-43ca-b577-3cec9fc6553d-c000.snappy.parquet
+w6_dashboard_minio/data/weather_week5.parquet/_SUCCESS

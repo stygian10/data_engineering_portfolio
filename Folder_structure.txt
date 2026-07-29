@@ -1,6 +1,8 @@
 .
 ├── Folder_structure.txt
 ├── README.md
+├── docker-compose.resolved.yml
+├── docker-compose.yml
 ├── requirements.txt
 ├── w10_fastapi_service
 │   ├── Dockerfile
@@ -24,7 +26,6 @@
 │   ├── requirements.txt
 │   └── tests
 │       ├── __init__.py
-│       ├── test_prediction.py
 │       └── test_prediction_loader.py
 ├── w1_weather_data_cleaner
 │   ├── README.md
@@ -64,7 +65,6 @@
 │   ├── config
 │   ├── dags
 │   │   └── weather_etl_dag.py
-│   ├── dashboard.log
 │   ├── data
 │   │   ├── parquet
 │   │   ├── processed
@@ -90,7 +90,6 @@
 │   │   └── raw
 │   ├── notebooks
 │   │   └── spark_etl_analysis.ipynb
-│   ├── requirements.txt
 │   ├── tests
 │   │   ├── __init__.py
 │   │   └── test_pyspark_vs_pandas_real.py.py
@@ -169,4 +168,4 @@
 │       └── upload_to_minio.py
 └── workflow.md
 
-54 directories, 116 files
+54 directories, 115 files

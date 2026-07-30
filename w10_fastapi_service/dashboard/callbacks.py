@@ -173,18 +173,20 @@ def register_callbacks(app):
         )
 
         try:
-            prediction = request_prediction(payload)
 
-        except Exception as e:
-            import traceback
+            prediction = request_prediction(
+                payload
+            )
 
-            traceback.print_exc()
+        except Exception:
 
             return (
-                record["time"].strftime("%d %b %Y %H:%M"),
+                record["time"].strftime(
+                    "%d %b %Y %H:%M"
+                ),
                 f"{record['temperature']:.1f} °C",
                 "Unavailable",
-                str(e),
+                "Prediction API Offline",
             )
 
         current_temperature = float(

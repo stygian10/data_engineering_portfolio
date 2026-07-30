@@ -105,7 +105,7 @@ live_prediction_section = html.Div(
         html.H2("Live Prediction"),
 
         create_source_box(
-            "Week 7 Feature Engineering Dataset "
+            "W7 Feature Engineering Dataset "
             "(w7_features_final.parquet) "
             "served through the Week 10 FastAPI "
             "prediction service."
@@ -214,7 +214,7 @@ historical_prediction_section = html.Div(
         html.H2("Historical Prediction"),
 
         create_source_box(
-            "Week 9 Prediction Dataset "
+            "W9 Prediction Dataset "
             "(weather_predictions.csv)"
         ),
 

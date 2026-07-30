@@ -27,6 +27,17 @@
 │   └── tests
 │       ├── __init__.py
 │       └── test_prediction_loader.py
+├── w11_deployment
+│   ├── README.md
+│   ├── diagrams
+│   ├── kubernetes
+│   │   └── README.md
+│   ├── render
+│   │   ├── Dockerfile.dashboard
+│   │   ├── Dockerfile.fastapi
+│   │   ├── README.md
+│   │   └── render.yaml
+│   └── screenshots
 ├── w1_weather_data_cleaner
 │   ├── README.md
 │   ├── README_TEMPLATE.md
@@ -168,4 +179,4 @@
 │       └── upload_to_minio.py
 └── workflow.md
 
-54 directories, 115 files
+59 directories, 121 files

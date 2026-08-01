@@ -1,8 +1,11 @@
 import logging
 import os
 
+from dotenv import load_dotenv
+
 import requests
 
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 
@@ -11,7 +14,7 @@ logging.basicConfig(level=logging.INFO)
 FASTAPI_URL = os.getenv(
     "FASTAPI_URL",
     "http://fastapi:8000",
-)
+).rstrip("/")
 
 API_URL = f"{FASTAPI_URL}/predict"
 

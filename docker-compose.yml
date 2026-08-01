@@ -224,6 +224,9 @@ services:
     volumes:
       - .:/workspace
 
+    env_file:
+      - .env
+
 
     environment:
       PYTHONUNBUFFERED: "1"
@@ -253,9 +256,11 @@ services:
     volumes:
       - .:/workspace
 
+    env_file:
+      - .env
+
     environment:
       PYTHONUNBUFFERED: "1"
-      FASTAPI_URL: http://fastapi:8000
 
     depends_on:
       fastapi:

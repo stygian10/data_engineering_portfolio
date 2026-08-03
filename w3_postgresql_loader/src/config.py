@@ -3,23 +3,37 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
-DATA_FILE = Path(
-    os.getenv(
-        "W2_DATA_FILE",
-        str(
-            BASE_DIR
-            / "w2_weather_etl_pipeline"
-            / "data"
-            / "processed"
-            / "weather_ready_for_postgres.csv"
-        ),
+# -----------------------------------------------------
+# Input Data
+# -----------------------------------------------------
+
+W2_DATA_FILE = os.getenv("W2_DATA_FILE")
+
+if not W2_DATA_FILE:
+    raise ValueError(
+        "Environment variable 'W2_DATA_FILE' is not set."
     )
+
+DATA_FILE = BASE_DIR / Path(W2_DATA_FILE)
+
+# -----------------------------------------------------
+# PostgreSQL Configuration
+# -----------------------------------------------------
+
+POSTGRES_HOST = os.getenv("POSTGRES_HOST")
+
+POSTGRES_PORT = int(
+    os.getenv("POSTGRES_PORT", "5432")
 )
 
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = int(os.getenv("DB_PORT", 5432))
-DB_NAME = os.getenv("DB_NAME", "airflow")
-DB_USER = os.getenv("DB_USER", "airflow")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "airflow")
+POSTGRES_DB = os.getenv("POSTGRES_DB")
+
+POSTGRES_USER = os.getenv("POSTGRES_USER")
+
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+
+# -----------------------------------------------------
+# Database Table
+# -----------------------------------------------------
 
 TABLE_NAME = "weather_data"

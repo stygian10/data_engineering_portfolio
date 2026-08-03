@@ -1,11 +1,11 @@
 import psycopg2
 
 from config import (
-    DB_HOST,
-    DB_PORT,
-    DB_NAME,
-    DB_USER,
-    DB_PASSWORD,
+    POSTGRES_HOST,
+    POSTGRES_PORT,
+    POSTGRES_DB,
+    POSTGRES_USER,
+    POSTGRES_PASSWORD,
 )
 
 
@@ -16,11 +16,11 @@ def get_connection():
 
     try:
         connection = psycopg2.connect(
-            host=DB_HOST,
-            port=DB_PORT,
-            database=DB_NAME,
-            user=DB_USER,
-            password=DB_PASSWORD,
+            host=POSTGRES_HOST,
+            port=POSTGRES_PORT,
+            database=POSTGRES_DB,
+            user=POSTGRES_USER,
+            password=POSTGRES_PASSWORD,
         )
 
         print("[SUCCESS] Connected to PostgreSQL.")
@@ -28,7 +28,9 @@ def get_connection():
         return connection
 
     except Exception as error:
-        print(f"[ERROR] Failed to connect to PostgreSQL: {error}")
+        print(
+            f"[ERROR] Failed to connect to PostgreSQL: {error}"
+        )
         raise
 
 
@@ -39,4 +41,7 @@ def close_connection(connection):
 
     if connection is not None:
         connection.close()
-        print("[INFO] PostgreSQL connection closed.")
+
+        print(
+            "[INFO] PostgreSQL connection closed."
+        )

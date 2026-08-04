@@ -34,16 +34,15 @@ x-airflow-common: &airflow-common
     PYTHONPATH: /opt/airflow
 
   volumes:
-    - ./w4_airflow_weather_pipeline/dags:/opt/airflow/dags
-    - ./w4_airflow_weather_pipeline/src:/opt/airflow/src
-    - ./w4_airflow_weather_pipeline/logs:/opt/airflow/logs
-    - ./w4_airflow_weather_pipeline/plugins:/opt/airflow/plugins
-    - ./w4_airflow_weather_pipeline/config:/opt/airflow/config
-    - ./w4_airflow_weather_pipeline/data:/opt/airflow/data
+    - ./dags:/opt/airflow/dags
+    - ./logs:/opt/airflow/logs
+    - ./plugins:/opt/airflow/plugins
+    - ./config:/opt/airflow/config
 
     - ./w1_weather_data_cleaner:/opt/airflow/w1
     - ./w2_weather_etl_pipeline:/opt/airflow/w2
     - ./w3_postgresql_loader:/opt/airflow/w3
+    - ./w4_airflow_weather_pipeline:/opt/airflow/w4
     - ./w5_spark_weather_etl:/opt/airflow/w5
     - ./w6_dashboard_minio:/opt/airflow/w6
     - ./w7_feature_engineering:/opt/airflow/w7

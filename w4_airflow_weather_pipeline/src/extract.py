@@ -8,6 +8,7 @@ from src.config import (
     CITIES,
     HOURLY_VARIABLES,
     TIMEZONE,
+    REQUEST_TIMEOUT,
     RAW_DATA_DIR,
 )
 
@@ -44,7 +45,7 @@ def extract_weather_data():
             response = requests.get(
                 OPEN_METEO_URL,
                 params=params,
-                timeout=30,
+                timeout=REQUEST_TIMEOUT,
             )
 
             response.raise_for_status()
@@ -54,7 +55,9 @@ def extract_weather_data():
             hourly_data = data.get("hourly")
 
             if not hourly_data:
-                print(f"[EXTRACT] No hourly weather data returned for {city}")
+                print(
+                    f"[EXTRACT] No hourly weather data returned for {city}"
+                )
                 continue
 
             df = pd.DataFrame(hourly_data)
@@ -77,6 +80,7 @@ def extract_weather_data():
             )
 
         except Exception as error:
+
             print(f"[EXTRACT] Failed for {city}: {error}")
             raise
 

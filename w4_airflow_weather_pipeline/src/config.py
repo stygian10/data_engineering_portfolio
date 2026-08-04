@@ -16,7 +16,14 @@ PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
 PARQUET_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Open-Meteo API
-OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
+OPEN_METEO_URL = os.getenv(
+    "OPEN_METEO_FORECAST_URL",
+    "https://api.open-meteo.com/v1/forecast",
+)
+
+TIMEZONE = os.getenv("TIMEZONE", "UTC")
+
+REQUEST_TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "30"))
 
 # Cities
 CITIES = {
@@ -35,19 +42,23 @@ CITIES = {
 }
 
 # Weather Variables
-HOURLY_VARIABLES = [
-    "temperature_2m",
-    "relative_humidity_2m",
-    "windspeed_10m",
-]
-
-TIMEZONE = "UTC"
+HOURLY_VARIABLES = os.getenv(
+    "HOURLY_VARIABLES",
+    "temperature_2m,relative_humidity_2m,windspeed_10m",
+).split(",")
 
 # PostgreSQL Configuration
-DB_HOST = os.getenv("DB_HOST", "postgres")
-DB_PORT = int(os.getenv("DB_PORT", 5432))
-DB_NAME = os.getenv("DB_NAME", "airflow")
-DB_USER = os.getenv("DB_USER", "airflow")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "airflow")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", "5432"))
+POSTGRES_DB = os.getenv("POSTGRES_DB", "airflow")
+POSTGRES_USER = os.getenv("POSTGRES_USER", "airflow")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "airflow")
 
-TABLE_NAME = "weather_data"
+# Database Table
+TABLE_NAME = os.getenv("DB_TABLE_NAME", "weather_data")
+
+# Project Directories
+W1_DIR = Path( os.getenv("W1_DIR", "/opt/airflow/w1"))
+W2_DIR = Path(os.getenv("W2_DIR", "/opt/airflow/w2"))
+W3_DIR = Path(os.getenv("W3_DIR", "/opt/airflow/w3"))
+HISTORICAL_DATASET = Path(os.getenv("HISTORICAL_DATASET",str(W2_DIR / "data" / "processed"),))

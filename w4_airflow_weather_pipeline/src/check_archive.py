@@ -1,26 +1,19 @@
-from pathlib import Path
 from datetime import datetime, timedelta
 import subprocess
 import psycopg2
 
 from src.config import (
-    DB_HOST,
-    DB_PORT,
-    DB_NAME,
-    DB_USER,
-    DB_PASSWORD,
+    POSTGRES_HOST,
+    POSTGRES_PORT,
+    POSTGRES_DB,
+    POSTGRES_USER,
+    POSTGRES_PASSWORD,
     TABLE_NAME,
+    W1_DIR,
+    W2_DIR,
+    W3_DIR,
+    HISTORICAL_DATASET,
 )
-
-
-# PROJECT PATHS
-
-
-W1_DIR = Path("/opt/airflow/w1")
-W2_DIR = Path("/opt/airflow/w2")
-W3_DIR = Path("/opt/airflow/w3")
-
-HISTORICAL_DATASET = W2_DIR / "data" / "processed"
 
 print("\n========== PATH CHECK ==========")
 print(f"W1_DIR             : {W1_DIR}")
@@ -30,9 +23,7 @@ print(f"HISTORICAL_DATASET : {HISTORICAL_DATASET}")
 print("================================\n")
 
 
-
 # DATASET CHECK
-
 
 def dataset_exists():
     """
@@ -45,22 +36,26 @@ def dataset_exists():
     return any(HISTORICAL_DATASET.iterdir())
 
 
-
 # DATABASE
 
-
 def get_connection():
+    """
+    Create and return a PostgreSQL connection.
+    """
 
     return psycopg2.connect(
-        host=DB_HOST,
-        port=DB_PORT,
-        database=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
+        host=POSTGRES_HOST,
+        port=POSTGRES_PORT,
+        database=POSTGRES_DB,
+        user=POSTGRES_USER,
+        password=POSTGRES_PASSWORD,
     )
 
 
 def historical_rows():
+    """
+    Return the number of historical records.
+    """
 
     connection = get_connection()
     cursor = connection.cursor()
@@ -69,7 +64,7 @@ def historical_rows():
         f"""
         SELECT COUNT(*)
         FROM {TABLE_NAME}
-        WHERE source='historical';
+        WHERE source = 'historical';
         """
     )
 
@@ -82,6 +77,9 @@ def historical_rows():
 
 
 def latest_historical_date():
+    """
+    Return the latest historical weather timestamp.
+    """
 
     connection = get_connection()
     cursor = connection.cursor()
@@ -90,7 +88,7 @@ def latest_historical_date():
         f"""
         SELECT MAX(time)
         FROM {TABLE_NAME}
-        WHERE source='historical';
+        WHERE source = 'historical';
         """
     )
 
@@ -102,11 +100,12 @@ def latest_historical_date():
     return latest
 
 
-
 # DATE CHECK
 
-
 def historical_up_to_date():
+    """
+    Check whether historical data is current.
+    """
 
     latest = latest_historical_date()
 
@@ -118,9 +117,7 @@ def historical_up_to_date():
     return latest.date() >= expected
 
 
-
 # RECOVERY COMMANDS
-
 
 def run_week1():
 
@@ -155,15 +152,11 @@ def run_week3():
     )
 
 
-
 # BRANCH DECISION
-
 
 def determine_pipeline_branch():
 
     print("\n========== PIPELINE CHECK ==========\n")
-
-    # ------------------------------------------------------
 
     if not dataset_exists():
 
@@ -173,8 +166,6 @@ def determine_pipeline_branch():
         return "run_w1_w2_w3"
 
     print("Historical dataset : FOUND")
-
-    # ------------------------------------------------------
 
     rows = historical_rows()
 
@@ -187,8 +178,6 @@ def determine_pipeline_branch():
 
         return "run_w3_only"
 
-    # ------------------------------------------------------
-
     latest = latest_historical_date()
 
     print(f"Latest historical  : {latest}")
@@ -200,19 +189,18 @@ def determine_pipeline_branch():
 
         return "run_w1_w2_w3"
 
-    # ------------------------------------------------------
-
     print("Historical data    : CURRENT")
     print("Branch             : skip_recovery")
 
     return "skip_recovery"
 
 
-
 # AIRFLOW TASK FUNCTIONS
 
-
 def run_w1_w2_w3():
+    """
+    Execute Weeks 1–3 recovery.
+    """
 
     run_week1()
     run_week2()
@@ -222,11 +210,17 @@ def run_w1_w2_w3():
 
 
 def run_w3_only():
+    """
+    Execute only Week 3 recovery.
+    """
 
     # Table creation is handled by the Airflow DAG.
     run_week3()
 
 
 def skip_recovery():
+    """
+    Skip historical recovery.
+    """
 
     print("\nRecovery skipped.\n")

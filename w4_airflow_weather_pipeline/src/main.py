@@ -1,3 +1,4 @@
+from src.cleanup import cleanup_generated_files
 from src.extract import extract_weather_data
 from src.transform import transform_weather_data
 from src.load import load_weather_data
@@ -10,6 +11,8 @@ def run_pipeline():
     """
 
     print("========== WEATHER ETL PIPELINE STARTED ==========")
+
+    cleanup_generated_files()
 
     extract_weather_data()
 

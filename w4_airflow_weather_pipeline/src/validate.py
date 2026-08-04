@@ -1,4 +1,6 @@
 from src.database import get_connection
+from src.config import TABLE_NAME
+
 
 def validate_weather_data():
     """
@@ -12,9 +14,9 @@ def validate_weather_data():
     try:
 
         cursor.execute(
-            """
+            f"""
             SELECT COUNT(*)
-            FROM weather_data
+            FROM {TABLE_NAME}
             WHERE source = 'forecast';
             """
         )
@@ -31,12 +33,12 @@ def validate_weather_data():
         )
 
         cursor.execute(
-            """
+            f"""
             SELECT
                 city,
                 COUNT(*) AS row_count,
                 MAX(time) AS latest_forecast
-            FROM weather_data
+            FROM {TABLE_NAME}
             WHERE source = 'forecast'
             GROUP BY city
             ORDER BY city;

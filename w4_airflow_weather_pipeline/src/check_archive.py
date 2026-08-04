@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import os
 import subprocess
 import psycopg2
 
@@ -124,8 +125,12 @@ def run_week1():
     print("\n========== WEEK 1 ==========")
 
     subprocess.run(
-        ["python", "src/main.py"],
+        ["python", "-m", "src.main"],
         cwd=W1_DIR,
+        env={
+            **os.environ,
+            "PYTHONPATH": str(W1_DIR),
+        },
         check=True,
     )
 
@@ -135,8 +140,12 @@ def run_week2():
     print("\n========== WEEK 2 ==========")
 
     subprocess.run(
-        ["python", "src/main.py"],
+        ["python", "-m", "src.main"],
         cwd=W2_DIR,
+        env={
+            **os.environ,
+            "PYTHONPATH": str(W2_DIR),
+        },
         check=True,
     )
 
@@ -146,8 +155,12 @@ def run_week3():
     print("\n========== WEEK 3 ==========")
 
     subprocess.run(
-        ["python", "src/main.py"],
+        ["python", "-m", "src.main"],
         cwd=W3_DIR,
+        env={
+            **os.environ,
+            "PYTHONPATH": str(W3_DIR),
+        },
         check=True,
     )
 

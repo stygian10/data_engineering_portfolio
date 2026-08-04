@@ -50,4 +50,3 @@ RUN java -version && \
 
 # Copy project files if the Dockerfile is built independently.
 # (Your current docker-compose bind mounts will override these.)
-COPY . .

@@ -3,9 +3,7 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
-# -----------------------------------------------------
 # Input Data
-# -----------------------------------------------------
 
 W2_DATA_FILE = os.getenv("W2_DATA_FILE")
 
@@ -16,9 +14,7 @@ if not W2_DATA_FILE:
 
 DATA_FILE = BASE_DIR / Path(W2_DATA_FILE)
 
-# -----------------------------------------------------
 # PostgreSQL Configuration
-# -----------------------------------------------------
 
 POSTGRES_HOST = os.getenv("POSTGRES_HOST")
 
@@ -32,8 +28,6 @@ POSTGRES_USER = os.getenv("POSTGRES_USER")
 
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
 
-# -----------------------------------------------------
 # Database Table
-# -----------------------------------------------------
 
 TABLE_NAME = "weather_data"

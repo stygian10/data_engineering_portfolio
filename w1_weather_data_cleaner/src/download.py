@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import requests
 
-from config import (
+from src.config import (
     API_URL,
     CITIES,
     HOURLY_VARIABLES,

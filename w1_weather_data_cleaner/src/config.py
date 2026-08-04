@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 # Project Paths
 
@@ -13,11 +14,20 @@ PROCESSED_DATA_FILE = PROCESSED_DATA_DIR / "uk_weather_clean.csv"
 
 # Open-Meteo Configuration
 
-API_URL = "https://archive-api.open-meteo.com/v1/archive"
+API_URL = os.getenv(
+    "OPEN_METEO_ARCHIVE_URL",
+    "https://archive-api.open-meteo.com/v1/archive",
+)
 
-TIMEZONE = "UTC"
+TIMEZONE = os.getenv(
+    "TIMEZONE",
+    "UTC",
+)
 
-START_DATE = "2025-01-01"
+START_DATE = os.getenv(
+    "W1_START_DATE",
+    "2025-01-01",
+)
 
 # End date will always be calculated in download.py as yesterday.
 
@@ -42,15 +52,14 @@ CITIES = [
 ]
 
 # Weather Variables
-# Keep these aligned with the variables used throughout the portfolio
-# (W4 -> W10). Add new variables here if future weeks require them.
 
-HOURLY_VARIABLES = [
-    "temperature_2m",
-    "relative_humidity_2m",
-    "wind_speed_10m",
-]
+HOURLY_VARIABLES = os.getenv(
+    "HOURLY_VARIABLES",
+    "temperature_2m,relative_humidity_2m,wind_speed_10m",
+).split(",")
 
 # Request Configuration
 
-REQUEST_TIMEOUT = 60   
+REQUEST_TIMEOUT = int(
+    os.getenv("REQUEST_TIMEOUT", "60")
+)

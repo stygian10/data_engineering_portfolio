@@ -2,7 +2,7 @@ import logging
 
 import pandas as pd
 
-from config import (
+from src.config import (
     PROCESSED_DATA_DIR,
     PROCESSED_DATA_FILE,
     RAW_DATA_FILE,
@@ -32,7 +32,11 @@ def clean_weather_data():
     duplicate_count = df.duplicated().sum()
 
     if duplicate_count > 0:
-        logging.info("Removing %s duplicate rows...", duplicate_count)
+        logging.info(
+            "Removing %s duplicate rows...",
+            duplicate_count,
+        )
+
         df = df.drop_duplicates()
 
     # Sort by time then city
@@ -44,14 +48,16 @@ def clean_weather_data():
     )
 
     logging.info(
-    "Date Range     : %s -> %s",
-    df["time"].min(),
-    df["time"].max(),
-)
+        "Date Range     : %s -> %s",
+        df["time"].min(),
+        df["time"].max(),
+    )
 
     logging.info(
         "Cities         : %s",
-        ", ".join(sorted(df["city"].unique()))
+        ", ".join(
+            sorted(df["city"].unique())
+        ),
     )
 
     # Create processed directory if it doesn't exist
@@ -71,14 +77,21 @@ def clean_weather_data():
     logging.info("Rows           : %s", len(df))
     logging.info("Columns        : %s", len(df.columns))
     logging.info("Duplicates     : %s", duplicate_count)
-    logging.info("Missing Values : %s", df.isnull().sum().sum())
-    logging.info("Saved File     : %s", PROCESSED_DATA_FILE)
+    logging.info(
+        "Missing Values : %s",
+        df.isnull().sum().sum(),
+    )
+    logging.info(
+        "Saved File     : %s",
+        PROCESSED_DATA_FILE,
+    )
     logging.info("----------------------------------------")
 
     return df
 
 
 def main():
+
     clean_weather_data()
 
 

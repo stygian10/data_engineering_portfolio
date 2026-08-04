@@ -1,7 +1,7 @@
-from extract import extract
-from transform import transform
-from validate import validate
-from load import load
+from src.extract import extract
+from src.transform import transform
+from src.validate import validate
+from src.load import load
 
 
 def run_pipeline():

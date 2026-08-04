@@ -1,6 +1,6 @@
 import psycopg2
 
-from config import (
+from src.config import (
     POSTGRES_HOST,
     POSTGRES_PORT,
     POSTGRES_DB,

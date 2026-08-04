@@ -1,5 +1,5 @@
-from config import TABLE_NAME
-from database import get_connection
+from src.config import TABLE_NAME
+from src.database import get_connection
 
 
 def validate_load():

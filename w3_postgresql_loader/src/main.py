@@ -6,8 +6,8 @@ load_dotenv(
     Path(__file__).resolve().parents[2] / ".env"
 )
 
-from load_data import load_data
-from validate_load import validate_load
+from src.load_data import load_data
+from src.validate_load import validate_load
 
 
 def run_pipeline():

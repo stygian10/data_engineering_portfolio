@@ -1,7 +1,7 @@
 import pandas as pd
 
-from config import DATA_FILE, TABLE_NAME
-from database import get_connection
+from src.config import DATA_FILE, TABLE_NAME
+from src.database import get_connection
 
 
 def load_data():

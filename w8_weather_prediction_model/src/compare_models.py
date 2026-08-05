@@ -33,7 +33,7 @@ from sklearn.metrics import (
     r2_score
 )
 
-from config import (
+from .config import (
     DATA_PATH,
     TARGET_COLUMN,
     RANDOM_STATE,

@@ -10,7 +10,7 @@
 import joblib
 import pandas as pd
 
-from config import (
+from .config import (
     DATA_PATH,
     TARGET_COLUMN,
     BEST_MODEL_PATH,

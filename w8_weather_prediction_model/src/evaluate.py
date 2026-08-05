@@ -19,7 +19,7 @@ import joblib
 
 from sklearn.model_selection import train_test_split
 
-from config import (
+from .config import (
     DATA_PATH,
     TARGET_COLUMN,
     RANDOM_STATE,

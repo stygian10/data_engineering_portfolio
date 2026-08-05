@@ -1,11 +1,11 @@
-from load_data import (
+from .load_data import (
     download_from_minio,
     load_data
 )
 
-from features import run_feature_pipeline
+from .features import run_feature_pipeline
 
-from config import OUTPUT_DATA_PATH
+from .config import OUTPUT_DATA_PATH
 
 
 def save_data(df):

@@ -86,3 +86,14 @@ data/processed/weather_week5.parquet
 * Integrate cloud storage (S3/MinIO) for raw and processed data
 
 
+Execution
+
+This project is intended to run inside the Docker/Airflow environment. The Docker image already contains the required PostgreSQL JDBC driver and Spark configuration.
+
+Run manually inside the Airflow container:
+
+docker exec -it weather-airflow-api bash
+cd /opt/airflow/w5
+python -m weather_etl.main
+
+or execute the Airflow DAG, which invokes the same command.

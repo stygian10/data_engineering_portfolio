@@ -2,34 +2,31 @@ import boto3
 
 from botocore.exceptions import ClientError
 
-from config import (
+from .config import (
     MINIO_ENDPOINT,
     MINIO_ACCESS_KEY,
     MINIO_SECRET_KEY,
-    MINIO_BUCKET,
+    MINIO_SECURE,
+    MINIO_BUCKET_NAME,
     MINIO_PREFIX,
     PREDICTION_CSV,
-    PREDICTION_PARQUET
+    PREDICTION_PARQUET,
 )
 
 
 def connect_to_minio():
     """
     Create an S3 client connected to the MinIO server.
-
-    Returns
-    -------
-    boto3.client
-        Configured S3 client.
     """
 
     print("Connecting to MinIO...")
 
     s3 = boto3.client(
         "s3",
-        endpoint_url=MINIO_ENDPOINT,
+        endpoint_url=f"http://{MINIO_ENDPOINT}",
         aws_access_key_id=MINIO_ACCESS_KEY,
         aws_secret_access_key=MINIO_SECRET_KEY,
+        use_ssl=MINIO_SECURE,
     )
 
     print("Connected successfully.")
@@ -40,52 +37,51 @@ def connect_to_minio():
 def create_bucket_if_needed(s3):
     """
     Create the bucket if it does not already exist.
-
-    Parameters
-    ----------
-    s3 : boto3.client
-        Connected S3 client.
     """
 
     try:
 
-        s3.head_bucket(Bucket=MINIO_BUCKET)
+        s3.head_bucket(
+            Bucket=MINIO_BUCKET_NAME
+        )
 
-        print(f"Bucket already exists: {MINIO_BUCKET}")
+        print(
+            f"Bucket already exists: {MINIO_BUCKET_NAME}"
+        )
 
     except ClientError:
 
-        print(f"Creating bucket: {MINIO_BUCKET}")
+        print(
+            f"Creating bucket: {MINIO_BUCKET_NAME}"
+        )
 
         s3.create_bucket(
-            Bucket=MINIO_BUCKET
+            Bucket=MINIO_BUCKET_NAME
         )
 
         print("Bucket created successfully.")
 
 
-def upload_file(s3, file_path, object_key):
+def upload_file(
+    s3,
+    file_path,
+    object_key,
+):
     """
     Upload a single file to MinIO.
-
-    Parameters
-    ----------
-    s3 : boto3.client
-        Connected S3 client.
-
-    file_path : pathlib.Path
-        Local file path.
-
-    object_key : str
-        Destination object key inside the bucket.
     """
+
+    if not file_path.exists():
+        raise FileNotFoundError(
+            f"File not found:\n{file_path}"
+        )
 
     print(f"\nUploading: {object_key}")
 
     s3.upload_file(
         Filename=str(file_path),
-        Bucket=MINIO_BUCKET,
-        Key=object_key
+        Bucket=MINIO_BUCKET_NAME,
+        Key=object_key,
     )
 
     print("Upload completed.")
@@ -100,27 +96,33 @@ def upload_predictions():
 
     create_bucket_if_needed(s3)
 
-    csv_key = MINIO_PREFIX + "weather_predictions.csv"
+    csv_key = (
+        MINIO_PREFIX
+        + PREDICTION_CSV.name
+    )
 
-    parquet_key = MINIO_PREFIX + "weather_predictions.parquet"
+    parquet_key = (
+        MINIO_PREFIX
+        + PREDICTION_PARQUET.name
+    )
 
     upload_file(
         s3,
         PREDICTION_CSV,
-        csv_key
+        csv_key,
     )
 
     upload_file(
         s3,
         PREDICTION_PARQUET,
-        parquet_key
+        parquet_key,
     )
 
     print("\nPrediction datasets uploaded successfully.")
 
-    print(f"Bucket: {MINIO_BUCKET}")
+    print(f"Bucket: {MINIO_BUCKET_NAME}")
 
-    print("Uploaded Objects:")
+    print("\nUploaded Objects:")
 
     print(csv_key)
 

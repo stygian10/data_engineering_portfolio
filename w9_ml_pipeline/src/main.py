@@ -1,74 +1,83 @@
-from load_model import load_model
-from load_features import load_features
-from predict import predict
-from save_predictions import save_predictions
-from evaluate_predictions import evaluate_predictions
+from .load_model import load_model
+from .load_features import load_features
+from .predict import predict
+from .save_predictions import save_predictions
+from .evaluate_predictions import evaluate_predictions
 
-# from upload_to_minio import upload_predictions
-"""Uploading is handled separately by the Airflow pipeline."""
+# from .upload_to_minio import upload_predictions
+# Uploading is handled separately by the Airflow pipeline.
 
 
 def main():
     """
-    Execute the complete machine learning inference pipeline,
-    including model loading, feature loading, prediction,
-    evaluation, and prediction file creation.
+    Execute the complete Week 9 machine learning inference pipeline.
     """
 
-    # Load the trained model and scaler
-    print("Loading trained model and scaler...")
+    try:
 
-    model, scaler = load_model()
+        # Load model and scaler
+        print("\nLoading trained model and scaler...")
 
-    # Load the feature dataset
-    print("\nLoading feature dataset...")
+        model, scaler = load_model()
 
-    features_df = load_features()
+        # Load features
+        print("\nLoading feature dataset...")
 
-    # Generate predictions
-    print("\nGenerating predictions...")
+        features_df = load_features()
 
-    prediction_df = predict(
-        model,
-        scaler,
-        features_df
-    )
+        # Generate predictions
+        print("\nGenerating predictions...")
 
-    # Evaluate predictions
-    print("\nEvaluating predictions...")
+        prediction_df = predict(
+            model,
+            scaler,
+            features_df,
+        )
 
-    metrics = evaluate_predictions(
-        prediction_df
-    )
+        # Evaluate predictions
+        print("\nEvaluating predictions...")
 
-    # Save prediction files
-    print("\nSaving prediction files...")
+        metrics = evaluate_predictions(
+            prediction_df,
+        )
 
-    save_predictions(
-        prediction_df
-    )
+        # Save predictions
+        print("\nSaving prediction files...")
 
-    # Upload prediction files to MinIO
-    # print("\nUploading prediction files to MinIO...")
-    # upload_predictions()
+        save_predictions(
+            prediction_df,
+        )
 
-    # Display summary
-    print("\nPrediction Summary")
-    print("-" * 40)
+        # Upload handled by Airflow
+        # print("\nUploading prediction files to MinIO...")
+        # upload_predictions()
 
-    print(f"Prediction Records : {len(prediction_df)}")
-    print(f"MAE                : {metrics['MAE']:.2f}")
-    print(f"RMSE               : {metrics['RMSE']:.2f}")
-    print(f"R²                 : {metrics['R2']:.2f}")
+        # Pipeline summary
 
-    # Display sample predictions
-    print("\nFirst five predictions:")
+        print("\n" + "=" * 60)
+        print("WEEK 9 PIPELINE SUMMARY")
+        print("=" * 60)
 
-    print(
-        prediction_df.head()
-    )
+        print(f"Prediction Records : {len(prediction_df)}")
+        print(f"MAE                : {metrics['MAE']:.2f}")
+        print(f"RMSE               : {metrics['RMSE']:.2f}")
+        print(f"R²                 : {metrics['R2']:.2f}")
 
-    print("\nWeek 9 ML Pipeline completed successfully.")
+        print("\nFirst Five Predictions")
+
+        print(
+            prediction_df.head()
+        )
+
+        print("\nWeek 9 ML Pipeline completed successfully.")
+
+    except Exception as error:
+
+        print("\nPipeline failed.")
+
+        print(error)
+
+        raise
 
 
 if __name__ == "__main__":

@@ -1,9 +1,9 @@
 import pandas as pd
 
-from config import (
+from .config import (
     FEATURE_DATA_PATH,
     TARGET_COLUMN,
-    TIME_COLUMN
+    TIME_COLUMN,
 )
 
 
@@ -24,7 +24,9 @@ def load_features():
         )
 
     # Load the dataset
-    features_df = pd.read_parquet(FEATURE_DATA_PATH)
+    features_df = pd.read_parquet(
+        FEATURE_DATA_PATH
+    )
 
     # Check if dataset is empty
     if features_df.empty:
@@ -35,7 +37,7 @@ def load_features():
     # Validate required columns
     required_columns = [
         TIME_COLUMN,
-        TARGET_COLUMN
+        TARGET_COLUMN,
     ]
 
     missing_columns = [

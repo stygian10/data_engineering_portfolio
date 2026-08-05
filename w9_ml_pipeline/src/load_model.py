@@ -1,8 +1,8 @@
 import joblib
 
-from config import (
+from .config import (
     BEST_MODEL_PATH,
-    SCALER_PATH
+    SCALER_PATH,
 )
 
 
@@ -29,10 +29,14 @@ def load_model():
         )
 
     # Load the model
-    model = joblib.load(BEST_MODEL_PATH)
+    model = joblib.load(
+        BEST_MODEL_PATH
+    )
 
     # Load the scaler
-    scaler = joblib.load(SCALER_PATH)
+    scaler = joblib.load(
+        SCALER_PATH
+    )
 
     # Confirmation message
     print("\nModel loaded successfully.")

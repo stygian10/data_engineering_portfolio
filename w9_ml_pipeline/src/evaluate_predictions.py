@@ -6,11 +6,13 @@ from sklearn.metrics import (
     r2_score,
 )
 
-from config import (
+from .config import (
     TARGET_COLUMN,
     TIME_COLUMN,
     PREDICTION_COLUMN,
-    FIGURES_DIR,
+    PREDICTION_VS_ACTUAL_FIGURE,
+    RESIDUAL_PLOT_FIGURE,
+    ERROR_DISTRIBUTION_FIGURE,
 )
 
 
@@ -61,8 +63,8 @@ def evaluate_predictions(prediction_df):
     # Prediction Error
 
     prediction_df["prediction_error"] = (
-        y_true -
-        y_pred
+        y_true
+        - y_pred
     )
 
     print("\nPrediction Error Summary")
@@ -107,8 +109,7 @@ def evaluate_predictions(prediction_df):
     plt.tight_layout()
 
     plt.savefig(
-        FIGURES_DIR /
-        "prediction_vs_actual.png"
+        PREDICTION_VS_ACTUAL_FIGURE
     )
 
     plt.close()
@@ -137,8 +138,7 @@ def evaluate_predictions(prediction_df):
     plt.tight_layout()
 
     plt.savefig(
-        FIGURES_DIR /
-        "residual_plot.png"
+        RESIDUAL_PLOT_FIGURE
     )
 
     plt.close()
@@ -161,28 +161,18 @@ def evaluate_predictions(prediction_df):
     plt.tight_layout()
 
     plt.savefig(
-        FIGURES_DIR /
-        "error_distribution.png"
+        ERROR_DISTRIBUTION_FIGURE
     )
 
     plt.close()
 
     print("\nSaved Figures")
 
-    print(
-        FIGURES_DIR /
-        "prediction_vs_actual.png"
-    )
+    print(PREDICTION_VS_ACTUAL_FIGURE)
 
-    print(
-        FIGURES_DIR /
-        "residual_plot.png"
-    )
+    print(RESIDUAL_PLOT_FIGURE)
 
-    print(
-        FIGURES_DIR /
-        "error_distribution.png"
-    )
+    print(ERROR_DISTRIBUTION_FIGURE)
 
     return {
         "MAE": mae,

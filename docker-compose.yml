@@ -193,14 +193,18 @@ services:
 
     working_dir: /workspace/w6_dashboard_minio
 
+    env_file:
+      - .env
+
     ports:
-      - "8050:8050"
+      - "${W6_DASH_PORT}:${W6_DASH_PORT}"
 
     volumes:
       - .:/workspace
 
     environment:
       MINIO_ENDPOINT: weather-minio:9000
+      PYTHONUNBUFFERED: "1"
 
     depends_on:
       minio:

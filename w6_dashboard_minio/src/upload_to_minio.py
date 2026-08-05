@@ -3,9 +3,9 @@ from pathlib import Path
 from minio import S3Error
 
 from .config import (
-    BUCKET_NAME,
+    MINIO_BUCKET_NAME,
+    MINIO_OBJECT_NAME,
     LOCAL_PARQUET_PATH,
-    OBJECT_PREFIX,
 )
 from .minio_client import get_minio_client
 
@@ -16,11 +16,11 @@ def upload_parquet_dataset():
     client = get_minio_client()
 
     # Create bucket if it doesn't exist
-    if not client.bucket_exists(BUCKET_NAME):
-        client.make_bucket(BUCKET_NAME)
-        print(f"Created bucket: {BUCKET_NAME}")
+    if not client.bucket_exists(MINIO_BUCKET_NAME):
+        client.make_bucket(MINIO_BUCKET_NAME)
+        print(f"Created bucket: {MINIO_BUCKET_NAME}")
     else:
-        print(f"Bucket already exists: {BUCKET_NAME}")
+        print(f"Bucket already exists: {MINIO_BUCKET_NAME}")
 
     dataset_path = Path(LOCAL_PARQUET_PATH)
 
@@ -30,19 +30,19 @@ def upload_parquet_dataset():
         )
 
     # Remove existing dataset
-    print(f"\nRemoving existing dataset: {OBJECT_PREFIX}")
+    print(f"\nRemoving existing dataset: {MINIO_OBJECT_NAME}")
 
     objects = list(
         client.list_objects(
-            BUCKET_NAME,
-            prefix=OBJECT_PREFIX,
+            MINIO_BUCKET_NAME,
+            prefix=MINIO_OBJECT_NAME,
             recursive=True,
         )
     )
 
     for obj in objects:
         client.remove_object(
-            BUCKET_NAME,
+            MINIO_BUCKET_NAME,
             obj.object_name,
         )
 
@@ -66,12 +66,12 @@ def upload_parquet_dataset():
     for file_path in dataset_files:
 
         object_name = (
-            f"{OBJECT_PREFIX}/"
+            f"{MINIO_OBJECT_NAME}/"
             f"{file_path.relative_to(dataset_path).as_posix()}"
         )
 
         client.fput_object(
-            bucket_name=BUCKET_NAME,
+            bucket_name=MINIO_BUCKET_NAME,
             object_name=object_name,
             file_path=str(file_path),
         )
@@ -80,8 +80,8 @@ def upload_parquet_dataset():
 
     print("\n===================================")
     print("Upload completed successfully.")
-    print(f"Bucket          : {BUCKET_NAME}")
-    print(f"Dataset Folder  : {OBJECT_PREFIX}")
+    print(f"Bucket          : {MINIO_BUCKET_NAME}")
+    print(f"Dataset Folder  : {MINIO_OBJECT_NAME}")
     print(f"Files Uploaded  : {len(dataset_files)}")
     print("===================================")
 

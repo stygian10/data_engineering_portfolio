@@ -1,28 +1,66 @@
-import os
 from pathlib import Path
+from dotenv import load_dotenv
+import os
 
 # Project root
+
 BASE_DIR = Path(__file__).resolve().parents[2]
 
+load_dotenv(BASE_DIR / ".env")
+
 # Week 6 project directory
+
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 
 # MinIO Configuration
-MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "localhost:9000")
-MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
-MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minioadmin")
-MINIO_SECURE = False
 
-# MinIO Bucket
-BUCKET_NAME = "weather-data-lake"
-OBJECT_PREFIX = "weather_week5.parquet"
+MINIO_ENDPOINT = os.getenv(
+    "MINIO_ENDPOINT",
+    "localhost:9000",
+)
 
-# ------------------------------------------------------------------
+MINIO_ACCESS_KEY = os.getenv(
+    "MINIO_ACCESS_KEY",
+    "minioadmin",
+)
+
+MINIO_SECRET_KEY = os.getenv(
+    "MINIO_SECRET_KEY",
+    "minioadmin",
+)
+
+MINIO_SECURE = (
+    os.getenv("MINIO_SECURE", "False").lower()
+    == "true"
+)
+
+MINIO_BUCKET_NAME = os.getenv(
+    "MINIO_BUCKET_NAME",
+    "weather-data-lake",
+)
+
+MINIO_OBJECT_NAME = os.getenv(
+    "MINIO_OBJECT_NAME",
+    "weather_week5.parquet",
+)
+
+# Dash Configuration
+
+W6_DASH_HOST = os.getenv(
+    "W6_DASH_HOST",
+    "0.0.0.0",
+)
+
+W6_DASH_PORT = int(
+    os.getenv("W6_DASH_PORT", "8050")
+)
+
+W6_DASH_DEBUG = (
+    os.getenv("W6_DASH_DEBUG", "True").lower()
+    == "true"
+)
+
 # Week 5 Spark Dataset
-# Works in both:
-# - Local development (w5_spark_weather_etl)
-# - Docker / Airflow (w5)
-# ------------------------------------------------------------------
 
 WEEK5_CANDIDATES = [
     BASE_DIR / "w5_spark_weather_etl",
@@ -32,6 +70,7 @@ WEEK5_CANDIDATES = [
 LOCAL_PARQUET_PATH = None
 
 for week5_dir in WEEK5_CANDIDATES:
+
     candidate = (
         week5_dir
         / "data"
@@ -44,6 +83,7 @@ for week5_dir in WEEK5_CANDIDATES:
         break
 
 if LOCAL_PARQUET_PATH is None:
+
     LOCAL_PARQUET_PATH = (
         WEEK5_CANDIDATES[0]
         / "data"
@@ -51,9 +91,7 @@ if LOCAL_PARQUET_PATH is None:
         / "weather_week5.parquet"
     )
 
-# ------------------------------------------------------------------
 # Local Download Directory
-# ------------------------------------------------------------------
 
 LOCAL_DATA_DIR = PROJECT_DIR / "data"
 

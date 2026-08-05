@@ -1,6 +1,14 @@
 from dash import Dash
 
-from .dashboard import app_layout, register_callbacks
+from .config import (
+    W6_DASH_HOST,
+    W6_DASH_PORT,
+    W6_DASH_DEBUG,
+)
+from .dashboard import (
+    app_layout,
+    register_callbacks,
+)
 
 app = Dash(__name__)
 
@@ -14,7 +22,7 @@ server = app.server
 
 if __name__ == "__main__":
     app.run(
-        host="0.0.0.0",
-        port=8050,
-        debug=True,
+    host=W6_DASH_HOST,
+    port=W6_DASH_PORT,
+    debug=W6_DASH_DEBUG,
     )

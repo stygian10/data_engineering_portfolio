@@ -82,3 +82,4 @@ def register_callbacks(app):
             filtered_df.to_dict("records"),
             [{"name": col, "id": col} for col in filtered_df.columns],
         )
+    

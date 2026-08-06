@@ -6,6 +6,11 @@
 │   └── weather_etl_dag.py
 ├── docker-compose.resolved.yml
 ├── docker-compose.yml
+├── orchestration
+│   ├── __init__.py
+│   ├── check_archive.py
+│   ├── config.py
+│   └── create_db.py
 ├── requirements.txt
 ├── w10_fastapi_service
 │   ├── Dockerfile
@@ -83,10 +88,8 @@
 │   ├── requirements.txt
 │   └── src
 │       ├── __init__.py
-│       ├── check_archive.py
 │       ├── cleanup.py
 │       ├── config.py
-│       ├── create_tables.py
 │       ├── database.py
 │       ├── extract.py
 │       ├── load.py
@@ -123,6 +126,7 @@
 │       ├── config.py
 │       ├── dashboard.py
 │       ├── data_loader.py
+│       ├── main.py
 │       ├── minio_client.py
 │       └── upload_to_minio.py
 ├── w7_feature_engineering
@@ -167,15 +171,18 @@
 │   │   ├── error_distribution.png
 │   │   ├── prediction_vs_actual.png
 │   │   └── residual_plot.png
-│   └── src
-│       ├── config.py
-│       ├── evaluate_predictions.py
-│       ├── load_features.py
-│       ├── load_model.py
-│       ├── main.py
-│       ├── predict.py
-│       ├── save_predictions.py
-│       └── upload_to_minio.py
+│   ├── src
+│   │   ├── config.py
+│   │   ├── evaluate_predictions.py
+│   │   ├── load_features.py
+│   │   ├── load_model.py
+│   │   ├── main.py
+│   │   ├── predict.py
+│   │   ├── save_predictions.py
+│   │   └── upload_to_minio.py
+│   └── w9_ml_pipeline
+│       ├── data
+│       └── figures
 └── workflow.md
 
-59 directories, 120 files
+63 directories, 123 files

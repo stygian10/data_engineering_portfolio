@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
-import os
 import subprocess
+import sys
+
 import psycopg2
 
-from src.config import (
+from orchestration.config import (
     POSTGRES_HOST,
     POSTGRES_PORT,
     POSTGRES_DB,
@@ -16,28 +17,10 @@ from src.config import (
     HISTORICAL_DATASET,
 )
 
-print("\n========== PATH CHECK ==========")
-print(f"W1_DIR             : {W1_DIR}")
-print(f"W2_DIR             : {W2_DIR}")
-print(f"W3_DIR             : {W3_DIR}")
-print(f"HISTORICAL_DATASET : {HISTORICAL_DATASET}")
-print("================================\n")
 
-
-# DATASET CHECK
-
-def dataset_exists():
-    """
-    Returns True if the Week 2 processed dataset exists.
-    """
-
-    if not HISTORICAL_DATASET.exists():
-        return False
-
-    return any(HISTORICAL_DATASET.iterdir())
-
-
+# =====================================================
 # DATABASE
+# =====================================================
 
 def get_connection():
     """
@@ -52,6 +35,25 @@ def get_connection():
         password=POSTGRES_PASSWORD,
     )
 
+
+# =====================================================
+# DATASET CHECK
+# =====================================================
+
+def dataset_exists():
+    """
+    Check whether the Week 2 processed dataset exists.
+    """
+
+    if not HISTORICAL_DATASET.exists():
+        return False
+
+    return any(HISTORICAL_DATASET.iterdir())
+
+
+# =====================================================
+# HISTORICAL DATABASE CHECKS
+# =====================================================
 
 def historical_rows():
     """
@@ -101,11 +103,9 @@ def latest_historical_date():
     return latest
 
 
-# DATE CHECK
-
 def historical_up_to_date():
     """
-    Check whether historical data is current.
+    Determine whether historical data is current.
     """
 
     latest = latest_historical_date()
@@ -118,54 +118,58 @@ def historical_up_to_date():
     return latest.date() >= expected
 
 
+# =====================================================
 # RECOVERY COMMANDS
+# =====================================================
 
-def run_week1():
+def run_w1():
 
     print("\n========== WEEK 1 ==========")
 
     subprocess.run(
-        ["python", "-m", "src.main"],
+        [
+            sys.executable,
+            "-m",
+            "src.main",
+        ],
         cwd=W1_DIR,
-        env={
-            **os.environ,
-            "PYTHONPATH": str(W1_DIR),
-        },
         check=True,
     )
 
 
-def run_week2():
+def run_w2():
 
     print("\n========== WEEK 2 ==========")
 
     subprocess.run(
-        ["python", "-m", "src.main"],
+        [
+            sys.executable,
+            "-m",
+            "src.main",
+        ],
         cwd=W2_DIR,
-        env={
-            **os.environ,
-            "PYTHONPATH": str(W2_DIR),
-        },
         check=True,
     )
 
 
-def run_week3():
+def run_w3():
 
     print("\n========== WEEK 3 ==========")
 
     subprocess.run(
-        ["python", "-m", "src.main"],
+        [
+            sys.executable,
+            "-m",
+            "src.main",
+        ],
         cwd=W3_DIR,
-        env={
-            **os.environ,
-            "PYTHONPATH": str(W3_DIR),
-        },
         check=True,
     )
 
 
-# BRANCH DECISION
+# =====================================================
+# PIPELINE DECISION
+# =====================================================
 
 def determine_pipeline_branch():
 
@@ -208,32 +212,34 @@ def determine_pipeline_branch():
     return "skip_recovery"
 
 
-# AIRFLOW TASK FUNCTIONS
+# =====================================================
+# AIRFLOW TASKS
+# =====================================================
 
 def run_w1_w2_w3():
     """
     Execute Weeks 1–3 recovery.
     """
 
-    run_week1()
-    run_week2()
+    run_w1()
+    run_w2()
 
-    # Table creation is handled by the Airflow DAG.
-    run_week3()
+    # PostgreSQL table creation is handled by the DAG.
+    run_w3()
 
 
 def run_w3_only():
     """
-    Execute only Week 3 recovery.
+    Execute Week 3 recovery only.
     """
 
-    # Table creation is handled by the Airflow DAG.
-    run_week3()
+    # PostgreSQL table creation is handled by the DAG.
+    run_w3()
 
 
 def skip_recovery():
     """
-    Skip historical recovery.
+    Skip recovery.
     """
 
     print("\nRecovery skipped.\n")

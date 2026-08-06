@@ -84,21 +84,3 @@ def upload_parquet_dataset():
     print(f"Dataset Folder  : {MINIO_OBJECT_NAME}")
     print(f"Files Uploaded  : {len(dataset_files)}")
     print("===================================")
-
-
-def main():
-    try:
-        upload_parquet_dataset()
-
-    except FileNotFoundError as error:
-        print(f"\nFile Error:\n{error}")
-
-    except S3Error as error:
-        print(f"\nMinIO Error:\n{error}")
-
-    except Exception as error:
-        print(f"\nUnexpected Error:\n{error}")
-
-
-if __name__ == "__main__":
-    main()

@@ -1,6 +1,9 @@
 .
 ├── Folder_structure.txt
 ├── README.md
+├── config
+├── dags
+│   └── weather_etl_dag.py
 ├── docker-compose.resolved.yml
 ├── docker-compose.yml
 ├── requirements.txt
@@ -73,14 +76,10 @@
 ├── w4_airflow_weather_pipeline
 │   ├── Dockerfile
 │   ├── README.md
-│   ├── config
-│   ├── dags
-│   │   └── weather_etl_dag.py
 │   ├── data
 │   │   ├── parquet
 │   │   ├── processed
 │   │   └── raw
-│   ├── docker-compose.yaml
 │   ├── requirements.txt
 │   └── src
 │       ├── __init__.py
@@ -179,4 +178,4 @@
 │       └── upload_to_minio.py
 └── workflow.md
 
-59 directories, 121 files
+59 directories, 120 files

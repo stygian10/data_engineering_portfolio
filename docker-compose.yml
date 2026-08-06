@@ -39,6 +39,8 @@ x-airflow-common: &airflow-common
     - ./plugins:/opt/airflow/plugins
     - ./config:/opt/airflow/config
 
+    - ./orchestration:/opt/airflow/orchestration
+
     - ./w1_weather_data_cleaner:/opt/airflow/w1
     - ./w2_weather_etl_pipeline:/opt/airflow/w2
     - ./w3_postgresql_loader:/opt/airflow/w3

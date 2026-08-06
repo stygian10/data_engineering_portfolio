@@ -2,23 +2,22 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.decorators import task
+from airflow.operators.empty import EmptyOperator
 from airflow.providers.standard.operators.bash import BashOperator
 from airflow.providers.standard.operators.python import PythonOperator
-from airflow.operators.empty import EmptyOperator
 
-from src.check_archive import (
+from orchestration.check_archive import (
     determine_pipeline_branch,
     run_w1_w2_w3,
     run_w3_only,
 )
 
-from src.cleanup import cleanup_generated_files
-from src.create_tables import create_table
-from src.extract import extract_weather_data
-from src.load import load_weather_data
-from src.transform import transform_weather_data
-from src.validate import validate_weather_data
+from orchestration.create_db import create_table
 
+
+# =====================================================
+# DEFAULT ARGUMENTS
+# =====================================================
 
 default_args = {
     "owner": "portfolio_user",
@@ -27,11 +26,54 @@ default_args = {
 }
 
 
-def end_pipeline():
-    print("\n===== Weather Intelligence Platform =====")
-    print("Pipeline completed successfully.")
-    print("=========================================\n")
+# =====================================================
+# PROJECT PATHS
+# =====================================================
 
+W4_PATH = "/opt/airflow/w4"
+W5_PATH = "/opt/airflow/w5"
+W6_PATH = "/opt/airflow/w6"
+W7_PATH = "/opt/airflow/w7"
+W8_PATH = "/opt/airflow/w8"
+W9_PATH = "/opt/airflow/w9"
+
+
+# =====================================================
+# HELPER FUNCTIONS
+# =====================================================
+
+def create_project_task(
+    task_id: str,
+    project_dir: str,
+    module: str,
+):
+    """
+    Execute an independent project using its main module.
+    """
+
+    return BashOperator(
+        task_id=task_id,
+        bash_command=f"""
+        set -e
+        cd {project_dir}
+        python -m {module}
+        """,
+    )
+
+
+def end_pipeline():
+    """
+    Final pipeline message.
+    """
+
+    print("\n============================================")
+    print("Weather Intelligence Platform Completed")
+    print("============================================\n")
+
+
+# =====================================================
+# DAG
+# =====================================================
 
 with DAG(
     dag_id="weather_etl_pipeline",
@@ -50,31 +92,28 @@ with DAG(
     ],
 ) as dag:
 
-    
-    # PIPELINE STATE CHECK
-    
+    # =================================================
+    # DATABASE INITIALIZATION
+    # =================================================
+
+    create_database_task = PythonOperator(
+        task_id="create_postgresql_table",
+        python_callable=create_table,
+    )
+
+    # =================================================
+    # PIPELINE RECOVERY CHECK
+    # =================================================
 
     @task.branch(task_id="check_pipeline_state")
     def check_pipeline_state():
         return determine_pipeline_branch()
 
-
     pipeline_check = check_pipeline_state()
 
-
-    
-    # CREATE POSTGRES TABLE
-    
-
-    create_table_task = PythonOperator(
-        task_id="create_postgresql_table",
-        python_callable=create_table,
-    )
-
-
-    
+    # =================================================
     # RECOVERY TASKS
-    
+    # =================================================
 
     run_all_recovery = PythonOperator(
         task_id="run_w1_w2_w3",
@@ -95,124 +134,86 @@ with DAG(
         trigger_rule="none_failed_min_one_success",
     )
 
-
-    
+    # =================================================
     # WEEK 4
-    
+    # =================================================
 
-    cleanup_task = PythonOperator(
-        task_id="cleanup_generated_files",
-        python_callable=cleanup_generated_files,
+    run_w4_pipeline = create_project_task(
+        task_id="run_w4_pipeline",
+        project_dir=W4_PATH,
+        module="src.main",
     )
 
-    extract_task = PythonOperator(
-        task_id="extract_weather_data",
-        python_callable=extract_weather_data,
-    )
-
-    transform_task = PythonOperator(
-        task_id="transform_weather_data",
-        python_callable=transform_weather_data,
-    )
-
-    load_task = PythonOperator(
-        task_id="load_weather_data",
-        python_callable=load_weather_data,
-    )
-
-    validate_task = PythonOperator(
-        task_id="validate_weather_data",
-        python_callable=validate_weather_data,
-    )
-
-
-    
+    # =================================================
     # WEEK 5
-    
+    # =================================================
 
-    spark_task = BashOperator(
-        task_id="run_spark_etl",
-        bash_command="""
-        set -e
-        cd /opt/airflow/w5
-        python -m weather_etl.main
-        """,
+    run_w5_pipeline = create_project_task(
+        task_id="run_w5_pipeline",
+        project_dir=W5_PATH,
+        module="weather_etl.main",
     )
-        
+
+    # =================================================
     # WEEK 6
-    
+    # =================================================
 
-    upload_to_minio_task = BashOperator(
-        task_id="upload_to_minio",
-        bash_command="""
-        set -e
-        cd /opt/airflow/w6
-        python -m src.upload_to_minio
-        """,
+    run_w6_pipeline = create_project_task(
+        task_id="run_w6_pipeline",
+        project_dir=W6_PATH,
+        module="src.main",
     )
 
-    
+    # =================================================
     # WEEK 7
-    
+    # =================================================
 
-    feature_engineering_task = BashOperator(
-        task_id="run_feature_engineering",
-        bash_command="""
-        set -e
-        cd /opt/airflow/w7
-        python src/main.py
-        """,
+    run_w7_pipeline = create_project_task(
+        task_id="run_w7_pipeline",
+        project_dir=W7_PATH,
+        module="src.main",
     )
 
-    
+    # =================================================
     # WEEK 8
-    
+    # =================================================
 
-    model_training_task = BashOperator(
-        task_id="run_model_training",
-        bash_command="""
-        set -e
-        cd /opt/airflow/w8
-        python src/compare_models.py
-        """,
+    run_w8_pipeline = create_project_task(
+        task_id="run_w8_pipeline",
+        project_dir=W8_PATH,
+        module="src.main",
     )
 
-    
+    # =================================================
     # WEEK 9
-    
+    # =================================================
 
-    prediction_pipeline_task = BashOperator(
-        task_id="run_prediction_pipeline",
-        bash_command="""
-        set -e
-        cd /opt/airflow/w9
-        python src/main.py
-        """,
+    run_w9_pipeline = create_project_task(
+        task_id="run_w9_pipeline",
+        project_dir=W9_PATH,
+        module="src.main",
     )
 
-    upload_prediction_to_minio_task = BashOperator(
+    upload_prediction_to_minio = create_project_task(
         task_id="upload_prediction_to_minio",
-        bash_command="""
-        set -e
-        cd /opt/airflow/w9
-        python src/upload_to_minio.py
-        """,
+        project_dir=W9_PATH,
+        module="src.upload_to_minio",
     )
 
-    
-    # END
-    
+    # =================================================
+    # END PIPELINE
+    # =================================================
 
     end_task = PythonOperator(
         task_id="end_pipeline",
         python_callable=end_pipeline,
     )
 
-    
+    # =================================================
     # PIPELINE FLOW
-    
+    # =================================================
 
-    create_table_task >> pipeline_check
+    create_database_task >> pipeline_check
 
     pipeline_check >> run_all_recovery
     pipeline_check >> run_database_recovery
@@ -224,16 +225,12 @@ with DAG(
 
     (
         recovery_complete
-        >> cleanup_task
-        >> extract_task
-        >> transform_task
-        >> load_task
-        >> validate_task
-        >> spark_task
-        >> upload_to_minio_task
-        >> feature_engineering_task
-        >> model_training_task
-        >> prediction_pipeline_task
-        >> upload_prediction_to_minio_task
+        >> run_w4_pipeline
+        >> run_w5_pipeline
+        >> run_w6_pipeline
+        >> run_w7_pipeline
+        >> run_w8_pipeline
+        >> run_w9_pipeline
+        >> upload_prediction_to_minio
         >> end_task
     )

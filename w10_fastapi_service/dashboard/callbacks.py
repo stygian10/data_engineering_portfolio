@@ -28,7 +28,6 @@ FEATURE_DATA = load_live_prediction_data()
 
 PREDICTION_DATA = load_prediction_data()
 
-
 # Load Model Metrics
 
 def load_model_metrics():
@@ -44,7 +43,6 @@ def load_model_metrics():
 
         return json.load(file)
 
-
 # Register Callbacks
 
 def register_callbacks(app):
@@ -54,23 +52,13 @@ def register_callbacks(app):
  
 # Populate City Dropdowns
     
-
     @app.callback(
 
-        Output(
-            "city-dropdown",
-            "options",
-        ),
+        Output("city-dropdown","options",),
 
-        Output(
-            "history-city-dropdown",
-            "options",
-        ),
+        Output("history-city-dropdown","options",),
 
-        Input(
-            "city-dropdown",
-            "id",
-        ),
+        Input("city-dropdown","id",),
 
     )
     def populate_city_dropdowns(_):
@@ -102,7 +90,6 @@ def register_callbacks(app):
     
     # Live Prediction
     
-
     @app.callback(
 
         Output("latest-update","children",),
@@ -416,19 +403,4 @@ def register_callbacks(app):
             metrics["trained_at"]
         )
 
-
-        return (
-
-            model_name,
-
-            r2_score,
-
-            rmse,
-
-            mae,
-
-            dataset,
-
-            trained_at,
-
-        )
+        return (model_name, r2_score, rmse, mae, dataset, trained_at,)

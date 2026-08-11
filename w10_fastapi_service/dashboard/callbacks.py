@@ -22,10 +22,7 @@ from dashboard.prediction_loader import (
     filter_prediction_data,
 )
 
-
-
 # Load dashboard datasets
-
 
 FEATURE_DATA = load_live_prediction_data()
 
@@ -33,7 +30,6 @@ PREDICTION_DATA = load_prediction_data()
 
 
 # Load Model Metrics
-
 
 def load_model_metrics():
     """
@@ -49,18 +45,15 @@ def load_model_metrics():
         return json.load(file)
 
 
-
 # Register Callbacks
-
 
 def register_callbacks(app):
     """
     Register all dashboard callbacks.
     """
-
-    # --------------------------------------------------------
-    # Populate City Dropdowns
-    # --------------------------------------------------------
+ 
+# Populate City Dropdowns
+    
 
     @app.callback(
 
@@ -106,36 +99,21 @@ def register_callbacks(app):
             options,
             options,
         )
-    # --------------------------------------------------------
+    
     # Live Prediction
-    # --------------------------------------------------------
+    
 
     @app.callback(
 
-        Output(
-            "latest-update",
-            "children",
-        ),
+        Output("latest-update","children",),
 
-        Output(
-            "current-temperature",
-            "children",
-        ),
+        Output("current-temperature","children",),
 
-        Output(
-            "predicted-temperature",
-            "children",
-        ),
+        Output("predicted-temperature","children",),
 
-        Output(
-            "prediction-difference",
-            "children",
-        ),
+        Output("prediction-difference","children",),
 
-        Input(
-            "city-dropdown",
-            "value",
-        ),
+        Input("city-dropdown","value",),
 
     )
     def update_live_prediction(city):
@@ -148,7 +126,7 @@ def register_callbacks(app):
 
             raise dash.exceptions.PreventUpdate
 
-        # Get latest feature record
+# Get latest feature record
 
         feature_data = load_live_prediction_data()
 
@@ -166,7 +144,7 @@ def register_callbacks(app):
                 "N/A",
             )
 
-        # Prepare FastAPI payload
+# Prepare FastAPI payload
 
         payload = prepare_api_payload(
             record
@@ -215,36 +193,20 @@ def register_callbacks(app):
             f"{prediction_difference:+.2f} °C",
 
         )
-    # --------------------------------------------------------
-    # Historical Prediction
-    # --------------------------------------------------------
-
+    
+# Historical Prediction
+    
     @app.callback(
 
-        Output(
-            "prediction-table",
-            "data",
-        ),
+        Output("prediction-table","data",),
 
-        Output(
-            "actual-vs-predicted-chart",
-            "figure",
-        ),
+        Output("actual-vs-predicted-chart","figure",),
 
-        Output(
-            "prediction-error-chart",
-            "figure",
-        ),
+        Output("prediction-error-chart","figure",),
 
-        Input(
-            "history-city-dropdown",
-            "value",
-        ),
+        Input("history-city-dropdown","value",),
 
-        Input(
-            "history-date-picker",
-            "date",
-        ),
+        Input("history-date-picker","date",),
 
     )
     def update_historical_prediction(
@@ -260,10 +222,9 @@ def register_callbacks(app):
 
             raise dash.exceptions.PreventUpdate
 
-        # ----------------------------------------
-        # Filter prediction dataset
-        # ----------------------------------------
-
+        
+# Filter prediction dataset
+        
         prediction_data = load_prediction_data()
 
         filtered_df = filter_prediction_data(
@@ -292,9 +253,8 @@ def register_callbacks(app):
 
             )
 
-        # ----------------------------------------
+        
         # Prediction table
-        # ----------------------------------------
 
         table_df = filtered_df.copy()
 
@@ -312,10 +272,9 @@ def register_callbacks(app):
 
         )
 
-        # ----------------------------------------
+        
         # Actual vs Predicted Chart
-        # ----------------------------------------
-
+        
         actual_chart = go.Figure()
 
         actual_chart.add_trace(
@@ -366,10 +325,9 @@ def register_callbacks(app):
 
         )
 
-        # ----------------------------------------
+        
         # Prediction Error Chart
-        # ----------------------------------------
-
+        
         error_chart = go.Figure()
 
         error_chart.add_trace(
@@ -407,46 +365,24 @@ def register_callbacks(app):
             error_chart,
 
         )
-    # --------------------------------------------------------
+    
     # Model Information
-    # --------------------------------------------------------
-
+    
     @app.callback(
 
-        Output(
-            "model-name",
-            "children",
-        ),
+        Output("model-name","children",),
 
-        Output(
-            "model-r2",
-            "children",
-        ),
+        Output("model-r2","children",),
 
-        Output(
-            "model-rmse",
-            "children",
-        ),
+        Output("model-rmse","children",),
 
-        Output(
-            "model-mae",
-            "children",
-        ),
+        Output("model-mae","children",),
 
-        Output(
-            "model-dataset",
-            "children",
-        ),
+        Output("model-dataset","children",),
 
-        Output(
-            "model-trained-at",
-            "children",
-        ),
+        Output("model-trained-at","children",),
 
-        Input(
-            "city-dropdown",
-            "value",
-        ),
+        Input("city-dropdown","value",),
 
     )
     def update_model_information(_):

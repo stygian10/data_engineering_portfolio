@@ -1,55 +1,29 @@
-from pathlib import Path
-from datetime import datetime
-from zoneinfo import ZoneInfo
 import logging
+import os
+from datetime import datetime
+from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
-
 logging.basicConfig(level=logging.INFO)
 
+# Feature dataset path
 
-# Feature dataset paths
-
-DOCKER_FEATURE_PATH = Path(
-    "/workspace/w7_feature_engineering/data/processed/w7_features_final.parquet"
+FEATURE_FILE = Path(
+    os.getenv(
+        "FEATURE_FILE",
+        "/workspace/w7_feature_engineering/data/processed/w7_features_final.parquet",
+    )
 )
-
-LOCAL_FEATURE_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "w7_feature_engineering"
-    / "data"
-    / "processed"
-    / "w7_features_final.parquet"
-)
-
-
-# Detect execution environment
-
-if DOCKER_FEATURE_PATH.is_file():
-
-    FEATURE_FILE = DOCKER_FEATURE_PATH
-
-    logging.info("Running inside Docker")
-
-else:
-
-    FEATURE_FILE = LOCAL_FEATURE_PATH
-
-    logging.info("Running locally")
-
 
 logging.info(f"Feature File: {FEATURE_FILE}")
-
 
 # Columns
 
 TIME_COLUMN = "time"
-
 TARGET_COLUMN = "target_temp_next_hour"
 
-
-# Load feature dataset
 
 def load_live_prediction_data():
     """
@@ -58,7 +32,6 @@ def load_live_prediction_data():
     """
 
     if not FEATURE_FILE.exists():
-
         raise FileNotFoundError(
             f"Feature file not found:\n{FEATURE_FILE}"
         )
@@ -90,8 +63,6 @@ def load_live_prediction_data():
     return df
 
 
-# Available cities
-
 def get_available_cities(df):
     """
     Return all available cities.
@@ -101,8 +72,6 @@ def get_available_cities(df):
         df["city"].unique()
     )
 
-
-# City records
 
 def get_city_data(df, city):
     """
@@ -120,8 +89,6 @@ def get_city_data(df, city):
     return city_df
 
 
-# Latest feature record
-
 def get_latest_record(df, city):
     """
     Return the feature record for the current
@@ -134,7 +101,6 @@ def get_latest_record(df, city):
     )
 
     if city_df.empty:
-
         logging.warning(
             f"No records found for {city}."
         )
@@ -142,12 +108,14 @@ def get_latest_record(df, city):
         return None
 
     # Ensure timestamps are hourly
+
     city_df[TIME_COLUMN] = (
         city_df[TIME_COLUMN]
         .dt.floor("h")
     )
 
     # Current date and hour
+
     current_hour = (
         datetime.now(
             ZoneInfo("Europe/London")
@@ -161,11 +129,13 @@ def get_latest_record(df, city):
     )
 
     # Find today's matching hour
+
     record = city_df[
         city_df[TIME_COLUMN] == current_hour
     ]
 
     # If today's hour is missing, use nearest record
+
     if record.empty:
 
         logging.warning(
@@ -195,8 +165,6 @@ def get_latest_record(df, city):
     return selected_record
 
 
-# Validate latest record
-
 def validate_latest_record(city):
     """
     Validate that a feature record exists.
@@ -215,7 +183,6 @@ def validate_latest_record(city):
     )
 
     if record is None:
-
         return (
             False,
             (
@@ -232,8 +199,6 @@ def validate_latest_record(city):
     )
 
 
-# Prepare payload for FastAPI
-
 def prepare_api_payload(record):
     """
     Convert a feature record into the payload
@@ -241,7 +206,6 @@ def prepare_api_payload(record):
     """
 
     if record is None:
-
         return None
 
     payload = record.drop(
@@ -257,12 +221,13 @@ def prepare_api_payload(record):
     for key, value in payload.items():
 
         if hasattr(value, "item"):
-
             payload[key] = value.item()
 
     print("\n===== FASTAPI PAYLOAD =====")
+
     for key, value in payload.items():
         print(f"{key}: {value}")
+
     print("===========================\n")
 
     return payload

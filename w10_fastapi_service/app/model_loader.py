@@ -1,60 +1,15 @@
-from pathlib import Path
 import logging
 
 import joblib
 
+from app.config import MODEL_PATH, SCALER_PATH
+
 logging.basicConfig(level=logging.INFO)
-
-
-# Model paths
-
-
-DOCKER_MODEL_PATH = Path(
-    "/workspace/w8_weather_prediction_model/models/linear_regression_model.pkl"
-)
-
-LOCAL_MODEL_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "w8_weather_prediction_model"
-    / "models"
-    / "linear_regression_model.pkl"
-)
-
-DOCKER_SCALER_PATH = Path(
-    "/workspace/w8_weather_prediction_model/models/scaler.pkl"
-)
-
-LOCAL_SCALER_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "w8_weather_prediction_model"
-    / "models"
-    / "scaler.pkl"
-)
-
-
-# Detect execution environment
-
-
-if DOCKER_MODEL_PATH.is_file():
-
-    MODEL_PATH = DOCKER_MODEL_PATH
-    SCALER_PATH = DOCKER_SCALER_PATH
-
-    logging.info("Running inside Docker")
-
-else:
-
-    MODEL_PATH = LOCAL_MODEL_PATH
-    SCALER_PATH = LOCAL_SCALER_PATH
-
-    logging.info("Running locally")
 
 logging.info(f"Model Path: {MODEL_PATH}")
 logging.info(f"Scaler Path: {SCALER_PATH}")
 
-
 # Cache loaded objects
-
 
 _model = None
 _scaler = None
@@ -73,13 +28,19 @@ def load_model():
     global _model
     global _scaler
 
+    # Return cached objects if already loaded
+
     if _model is not None and _scaler is not None:
         return _model, _scaler
+
+    # Validate model
 
     if not MODEL_PATH.exists():
         raise FileNotFoundError(
             f"Model file not found:\n{MODEL_PATH}"
         )
+
+    # Validate scaler
 
     if not SCALER_PATH.exists():
         raise FileNotFoundError(

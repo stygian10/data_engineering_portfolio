@@ -2,33 +2,43 @@ apiVersion: apps/v1
 kind: Deployment
 
 metadata:
-  name: fastapi-deployment
+  name: prediction-dashboard-deployment
 
 spec:
   replicas: 1
 
   selector:
     matchLabels:
-      app: fastapi
+      app: prediction-dashboard
 
   template:
     metadata:
       labels:
-        app: fastapi
+        app: prediction-dashboard
 
     spec:
       containers:
-        - name: fastapi
+        - name: prediction-dashboard
 
           image: data_engineering_portfolio-fastapi:latest
           imagePullPolicy: Never
 
+          workingDir: /app
+
+          command:
+            - python
+            - -m
+            - dashboard.app
+
           ports:
-            - containerPort: 8000
+            - containerPort: 8051
 
           env:
             - name: PYTHONUNBUFFERED
               value: "1"
+
+            - name: FASTAPI_URL
+              value: "http://fastapi-service:8000"
 
             - name: MODEL_PATH
               value: "/app/model_artifacts/linear_regression_model.pkl"
@@ -61,15 +71,15 @@ spec:
           readinessProbe:
             httpGet:
               path: /
-              port: 8000
-            initialDelaySeconds: 5
+              port: 8051
+            initialDelaySeconds: 10
             periodSeconds: 10
 
           livenessProbe:
             httpGet:
               path: /
-              port: 8000
-            initialDelaySeconds: 15
+              port: 8051
+            initialDelaySeconds: 20
             periodSeconds: 20
 
       volumes:

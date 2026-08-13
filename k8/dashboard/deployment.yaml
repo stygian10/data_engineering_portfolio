@@ -17,7 +17,68 @@ spec:
         app: prediction-dashboard
 
     spec:
+
+      # Download current artifacts from S3 before Dashboard starts
+      initContainers:
+
+        - name: download-s3-artifacts
+
+          image: public.ecr.aws/aws-cli/aws-cli:latest
+          imagePullPolicy: IfNotPresent
+
+          envFrom:
+            - secretRef:
+                name: weather-env
+
+          command:
+            - /bin/sh
+            - -c
+
+          args:
+            - |
+              set -e
+
+              echo "Downloading W7 feature file..."
+
+              aws s3 cp \
+                "s3://${S3_BUCKET_NAME}/features/w7_features_final.parquet" \
+                "/app/data/w7_features_final.parquet"
+
+              echo "Downloading W9 prediction file..."
+
+              aws s3 cp \
+                "s3://${S3_BUCKET_NAME}/predictions/weather_predictions.csv" \
+                "/app/data/weather_predictions.csv"
+
+              echo "Downloading model metrics..."
+
+              aws s3 cp \
+                "s3://${S3_BUCKET_NAME}/models/model_metrics.json" \
+                "/app/model_artifacts/model_metrics.json"
+
+              echo "Downloading best model..."
+
+              aws s3 cp \
+                "s3://${S3_BUCKET_NAME}/models/best_model.pkl" \
+                "/app/model_artifacts/best_model.pkl"
+
+              echo "Downloading scaler..."
+
+              aws s3 cp \
+                "s3://${S3_BUCKET_NAME}/models/scaler.pkl" \
+                "/app/model_artifacts/scaler.pkl"
+
+              echo "All Dashboard S3 files downloaded successfully."
+
+          volumeMounts:
+            - name: application-data
+              mountPath: /app/data
+
+            - name: model-artifacts
+              mountPath: /app/model_artifacts
+
       containers:
+
         - name: prediction-dashboard
 
           image: data_engineering_portfolio-fastapi:latest
@@ -41,7 +102,7 @@ spec:
               value: "http://fastapi-service:8000"
 
             - name: MODEL_PATH
-              value: "/app/model_artifacts/linear_regression_model.pkl"
+              value: "/app/model_artifacts/best_model.pkl"
 
             - name: SCALER_PATH
               value: "/app/model_artifacts/scaler.pkl"
@@ -56,16 +117,12 @@ spec:
               value: "/app/data/weather_predictions.csv"
 
           volumeMounts:
+            - name: application-data
+              mountPath: /app/data
+              readOnly: true
+
             - name: model-artifacts
               mountPath: /app/model_artifacts
-              readOnly: true
-
-            - name: feature-data
-              mountPath: /app/data/w7_features_final.parquet
-              readOnly: true
-
-            - name: prediction-data
-              mountPath: /app/data/weather_predictions.csv
               readOnly: true
 
           readinessProbe:
@@ -83,17 +140,9 @@ spec:
             periodSeconds: 20
 
       volumes:
+
+        - name: application-data
+          emptyDir: {}
+
         - name: model-artifacts
-          hostPath:
-            path: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w8_weather_prediction_model/models
-            type: Directory
-
-        - name: feature-data
-          hostPath:
-            path: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w7_feature_engineering/data/processed/w7_features_final.parquet
-            type: File
-
-        - name: prediction-data
-          hostPath:
-            path: /Users/gaurav/Documents/Projects/data_engineering_portfolio/w9_ml_pipeline/data/predictions/weather_predictions.csv
-            type: File
+          emptyDir: {}

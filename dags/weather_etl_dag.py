@@ -13,6 +13,7 @@ from orchestration.check_archive import (
 )
 
 from orchestration.create_db import create_table
+from orchestration.cloud_storage import upload_airflow_artifacts
 
 
 # =====================================================
@@ -201,6 +202,15 @@ with DAG(
     )
 
     # =================================================
+        # Cloud Storage
+    # =================================================
+
+    upload_artifacts_to_s3 = PythonOperator(
+        task_id="upload_artifacts_to_s3",
+        python_callable=upload_airflow_artifacts,
+    )
+
+    # =================================================
     # END PIPELINE
     # =================================================
 
@@ -232,5 +242,6 @@ with DAG(
         >> run_w8_pipeline
         >> run_w9_pipeline
         >> upload_prediction_to_minio
+        >> upload_artifacts_to_s3
         >> end_task
     )

@@ -6,12 +6,35 @@
 │   └── weather_etl_dag.py
 ├── docker-compose.resolved.yml
 ├── docker-compose.yml
+├── k8
+│   ├── README.md
+│   ├── airflow
+│   ├── config
+│   │   ├── configmap.yaml
+│   │   └── secret.yaml
+│   ├── dashboard
+│   │   ├── deployment.yaml
+│   │   └── service.yaml
+│   ├── fastapi
+│   │   ├── deployment.yaml
+│   │   └── service.yaml
+│   ├── learning
+│   │   ├── nginx-deployment.yaml
+│   │   └── nginx-pod.yaml
+│   ├── minio
+│   ├── namespace.yaml
+│   ├── postgres
+│   └── prediction-dashboard
 ├── orchestration
 │   ├── __init__.py
 │   ├── check_archive.py
+│   ├── cloud_storage.py
 │   ├── config.py
-│   └── create_db.py
+│   ├── create_db.py
+│   └── test_cloud_storage.py
 ├── requirements.txt
+├── s3_test.txt
+├── s3_test_downloaded.txt
 ├── w10_fastapi_service
 │   ├── Dockerfile
 │   ├── README.md
@@ -38,8 +61,6 @@
 ├── w11_deployment
 │   ├── README.md
 │   ├── diagrams
-│   ├── kubernetes
-│   │   └── README.md
 │   ├── render
 │   │   ├── Dockerfile.dashboard
 │   │   ├── Dockerfile.fastapi
@@ -185,4 +206,4 @@
 │       └── figures
 └── workflow.md
 
-63 directories, 123 files
+71 directories, 136 files

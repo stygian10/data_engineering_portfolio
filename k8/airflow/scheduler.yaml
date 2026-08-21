@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-scheduler
+  labels:
+    app: airflow-scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow-scheduler
+  template:
+    metadata:
+      labels:
+        app: airflow-scheduler
+    spec:
+      containers:
+        - name: airflow-scheduler
+          image: airflow-custom:k8
+          imagePullPolicy: IfNotPresent
+          command:
+            - airflow
+            - scheduler
+          envFrom:
+            - secretRef:
+                name: weather-env
+          env:
+            - name: AIRFLOW__CORE__EXECUTOR
+              value: "LocalExecutor"
+            - name: AIRFLOW__CORE__AUTH_MANAGER
+              value: "airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager"
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              value: "postgresql+psycopg2://airflow:airflow@postgres:5432/airflow"
+            - name: AIRFLOW__CORE__EXECUTION_API_SERVER_URL
+              value: "http://airflow-apiserver:8080/execution/"
+            - name: AIRFLOW__CORE__LOAD_EXAMPLES
+              value: "false"
+            - name: AIRFLOW__CORE__FERNET_KEY
+              value: ""
+            - name: AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION
+              value: "true"
+            - name: AIRFLOW__API_AUTH__JWT_SECRET
+              value: "airflow_jwt_secret"
+            - name: AIRFLOW__API_AUTH__JWT_ISSUER
+              value: "airflow"
+            - name: AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK
+              value: "true"
+            - name: POSTGRES_HOST
+              value: "postgres"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: "airflow"
+            - name: POSTGRES_USER
+              value: "airflow"
+            - name: POSTGRES_PASSWORD
+              value: "airflow"
+            - name: W2_DATA_FILE
+              value: "/opt/airflow/w2/data/processed/weather_ready_for_postgres.csv"
+            - name: W7_FEATURE_DATA_PATH
+              value: "/opt/airflow/w7/data/processed/w7_features_final.parquet"
+            - name: MINIO_ENDPOINT
+              value: "weather-minio:9000"
+            - name: PYTHONPATH
+              value: "/opt/airflow"
+          livenessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - airflow jobs check --job-type SchedulerJob --hostname "$HOSTNAME"
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi

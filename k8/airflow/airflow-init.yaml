@@ -1,0 +1,86 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: airflow-init
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: airflow-init
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: airflow-init
+          image: airflow-custom:k8
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: weather-env
+          env:
+            - name: AIRFLOW__CORE__EXECUTOR
+              value: "LocalExecutor"
+            - name: AIRFLOW__CORE__AUTH_MANAGER
+              value: "airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager"
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              value: "postgresql+psycopg2://airflow:airflow@postgres:5432/airflow"
+            - name: AIRFLOW__CORE__LOAD_EXAMPLES
+              value: "false"
+            - name: AIRFLOW__CORE__FERNET_KEY
+              value: ""
+            - name: AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION
+              value: "true"
+            - name: AIRFLOW__API_AUTH__JWT_SECRET
+              value: "airflow_jwt_secret"
+            - name: AIRFLOW__API_AUTH__JWT_ISSUER
+              value: "airflow"
+            - name: POSTGRES_HOST
+              value: "postgres"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: "airflow"
+            - name: POSTGRES_USER
+              value: "airflow"
+            - name: POSTGRES_PASSWORD
+              value: "airflow"
+            - name: W2_DATA_FILE
+              value: "/opt/airflow/w2/data/processed/weather_ready_for_postgres.csv"
+            - name: W7_FEATURE_DATA_PATH
+              value: "/opt/airflow/w7/data/processed/w7_features_final.parquet"
+            - name: MINIO_ENDPOINT
+              value: "weather-minio:9000"
+            - name: PYTHONPATH
+              value: "/opt/airflow"
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+
+              echo "Waiting for PostgreSQL..."
+
+              until python -c '
+              import psycopg2
+              psycopg2.connect(
+                  host="postgres",
+                  port=5432,
+                  dbname="airflow",
+                  user="airflow",
+                  password="airflow",
+              ).close()
+              '; do
+                echo "PostgreSQL is not ready yet..."
+                sleep 3
+              done
+
+              echo "PostgreSQL is ready."
+              echo "Running Airflow database migration..."
+
+              airflow db migrate
+
+              echo "Creating Airflow admin user..."
+
+              airflow users create                 --username admin                 --firstname admin                 --lastname user                 --role Admin                 --email admin@email.com                 --password admin || true
+
+              echo "Airflow initialization completed."

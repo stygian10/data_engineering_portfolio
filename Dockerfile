@@ -56,6 +56,7 @@ COPY --chown=airflow:root w6_dashboard_minio/ /opt/airflow/w6/
 COPY --chown=airflow:root w7_feature_engineering/ /opt/airflow/w7/
 COPY --chown=airflow:root w8_weather_prediction_model/ /opt/airflow/w8/
 COPY --chown=airflow:root w9_ml_pipeline/ /opt/airflow/w9/
+COPY --chown=airflow:root w10_fastapi_service/ /opt/airflow/w10/
 
 # Verify Java and PySpark installation
 RUN java -version && \

@@ -7,7 +7,6 @@ plotly
 dash
 pyarrow #Reading/writing Parquet
 
-
 # Machine Learning
 scikit-learn
 joblib
@@ -18,5 +17,6 @@ boto3
 minio
 python-dotenv
 
+# FastAPI
 fastapi
 uvicorn

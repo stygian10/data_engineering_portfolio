@@ -77,8 +77,18 @@ spec:
 
         - name: fastapi
 
-          image: data_engineering_portfolio-fastapi:latest
+          image: airflow-custom:latest
           imagePullPolicy: Never
+
+          workingDir: /opt/airflow/w10
+
+          command:
+            - uvicorn
+            - app.main:app
+            - --host
+            - "0.0.0.0"
+            - --port
+            - "8000"
 
           ports:
             - containerPort: 8000

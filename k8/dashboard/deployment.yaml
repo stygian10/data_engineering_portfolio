@@ -81,10 +81,10 @@ spec:
 
         - name: prediction-dashboard
 
-          image: data_engineering_portfolio-fastapi:latest
+          image: airflow-custom:latest
           imagePullPolicy: Never
 
-          workingDir: /app
+          workingDir: /opt/airflow/w10
 
           command:
             - python

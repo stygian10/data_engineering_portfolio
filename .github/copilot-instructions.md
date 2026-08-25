@@ -4,10 +4,12 @@ Generate concise, professional Git commit messages for the Weather Intelligence 
 
 ## Format
 
-<type>(<scope>): <short imperative description>
-- <primary change>
-- <technical change>
-- <purpose, impact, or validation>
+Use exactly this structure:
+
+`<type>(<scope>): <short imperative description>`
+- `<primary change>`
+- `<technical change>`
+- `<purpose, impact, or validation>`
 
 ## Rules
 

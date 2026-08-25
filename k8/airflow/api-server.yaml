@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: airflow-apiserver
-          image: airflow-custom:k8
+          image: airflow-custom:latest
           imagePullPolicy: IfNotPresent
           command:
             - airflow

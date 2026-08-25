@@ -146,3 +146,4 @@ websocket-client==1.9.0
 Werkzeug==3.1.7
 widgetsnbextension==4.0.15
 zipp==3.23.0
+python-dotenv

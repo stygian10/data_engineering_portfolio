@@ -12,7 +12,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: airflow-init
-          image: airflow-custom:k8
+          image: airflow-custom:latest
           imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:

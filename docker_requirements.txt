@@ -1,0 +1,22 @@
+numpy
+pandas
+requests
+psycopg2-binary
+pyspark
+plotly
+dash
+pyarrow #Reading/writing Parquet
+
+
+# Machine Learning
+scikit-learn
+joblib
+matplotlib
+
+# MinIO / S3
+boto3 
+minio
+python-dotenv
+
+fastapi
+uvicorn

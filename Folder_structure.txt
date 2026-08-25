@@ -1,4 +1,5 @@
 .
+├── Dockerfile
 ├── Folder_structure.txt
 ├── README.md
 ├── config
@@ -6,9 +7,16 @@
 │   └── weather_etl_dag.py
 ├── docker-compose.resolved.yml
 ├── docker-compose.yml
+├── docker_requirements.txt
 ├── k8
 │   ├── README.md
 │   ├── airflow
+│   │   ├── Dockerfile
+│   │   ├── README.md
+│   │   ├── airflow-init.yaml
+│   │   ├── api-server.yaml
+│   │   ├── dag-processor.yaml
+│   │   └── scheduler.yaml
 │   ├── config
 │   │   ├── configmap.yaml
 │   │   └── secret.yaml
@@ -22,9 +30,19 @@
 │   │   ├── nginx-deployment.yaml
 │   │   └── nginx-pod.yaml
 │   ├── minio
+│   │   ├── README.md
+│   │   ├── deploy_minio.sh
+│   │   ├── pvc.yaml
+│   │   ├── service.yaml
+│   │   └── statefulset.yaml
 │   ├── namespace.yaml
-│   ├── postgres
-│   └── prediction-dashboard
+│   └── postgres
+│       ├── README.md
+│       ├── deploy_postgres.sh
+│       ├── pvc.yaml
+│       ├── service.yaml
+│       └── statefulset.yaml
+├── k8-commands.md
 ├── orchestration
 │   ├── __init__.py
 │   ├── check_archive.py
@@ -36,7 +54,6 @@
 ├── s3_test.txt
 ├── s3_test_downloaded.txt
 ├── w10_fastapi_service
-│   ├── Dockerfile
 │   ├── README.md
 │   ├── app
 │   │   ├── config.py
@@ -54,7 +71,6 @@
 │   │   ├── live_prediction_loader.py
 │   │   ├── prediction_loader.py
 │   │   └── styles.py
-│   ├── requirements.txt
 │   └── tests
 │       ├── __init__.py
 │       └── test_prediction_loader.py
@@ -100,7 +116,6 @@
 │       ├── main.py
 │       └── validate_load.py
 ├── w4_airflow_weather_pipeline
-│   ├── Dockerfile
 │   ├── README.md
 │   ├── data
 │   │   ├── parquet
@@ -136,11 +151,9 @@
 │       ├── spark_sql_analysis.py
 │       └── transform.py
 ├── w6_dashboard_minio
-│   ├── Dockerfile
 │   ├── README.md
 │   ├── data
 │   │   └── weather_week5.parquet
-│   ├── requirements.txt
 │   └── src
 │       ├── __init__.py
 │       ├── app.py
@@ -206,4 +219,4 @@
 │       └── figures
 └── workflow.md
 
-71 directories, 136 files
+70 directories, 150 files

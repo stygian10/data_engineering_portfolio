@@ -7,7 +7,7 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels:
+    matchLabels: 
       app: airflow-dag-processor
   template:
     metadata:
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: airflow-dag-processor
-          image: airflow-custom:k8
+          image: airflow-custom:latest
           imagePullPolicy: IfNotPresent
           command:
             - airflow

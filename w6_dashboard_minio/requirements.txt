@@ -1,7 +1,0 @@
-pandas
-plotly
-dash
-boto3
-pyarrow
-minio
-python-dotenv

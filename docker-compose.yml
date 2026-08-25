@@ -1,5 +1,7 @@
 x-airflow-common: &airflow-common
-  build: ./w4_airflow_weather_pipeline
+  build:
+    context: .
+    dockerfile: Dockerfile
   image: airflow-custom:latest
 
   env_file:
@@ -189,7 +191,7 @@ services:
     restart: always
 
   dashboard:
-    build: ./w6_dashboard_minio
+    image: airflow-custom:latest
 
     container_name: weather-dashboard-w6
 
@@ -218,9 +220,11 @@ services:
 
   fastapi:
 
-    build: ./w10_fastapi_service
+    image: airflow-custom:latest
 
     container_name: weather-fastapi-w10
+
+    entrypoint: []
 
     working_dir: /workspace/w10_fastapi_service
 
@@ -253,9 +257,11 @@ services:
 
   prediction-dashboard:
 
-    build: ./w10_fastapi_service
+    image: airflow-custom:latest
 
     container_name: weather-prediction-dashboard-w10
+
+    entrypoint: []
 
     working_dir: /workspace/w10_fastapi_service
 

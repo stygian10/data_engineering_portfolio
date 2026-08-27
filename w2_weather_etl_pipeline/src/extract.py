@@ -1,6 +1,6 @@
 import pandas as pd
 
-from config import INPUT_FILE
+from src.config import INPUT_FILE
 
 
 def extract():

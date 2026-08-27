@@ -9,7 +9,7 @@ from airflow.providers.standard.operators.python import PythonOperator
 from orchestration.check_archive import (
     determine_pipeline_branch,
     run_w1_w2_w3,
-    run_w3_only,
+    archive_expired_forecasts,
 )
 
 from orchestration.create_db import create_table
@@ -121,11 +121,6 @@ with DAG(
         python_callable=run_w1_w2_w3,
     )
 
-    run_database_recovery = PythonOperator(
-        task_id="run_w3_only",
-        python_callable=run_w3_only,
-    )
-
     skip_recovery = EmptyOperator(
         task_id="skip_recovery",
     )
@@ -133,6 +128,15 @@ with DAG(
     recovery_complete = EmptyOperator(
         task_id="recovery_complete",
         trigger_rule="none_failed_min_one_success",
+    )
+
+    # =================================================
+    # FORECAST -> ARCHIVE TRANSITION
+    # =================================================
+
+    archive_forecast_transition = PythonOperator(
+        task_id="archive_expired_forecasts",
+        python_callable=archive_expired_forecasts,
     )
 
     # =================================================
@@ -202,7 +206,7 @@ with DAG(
     )
 
     # =================================================
-        # Cloud Storage
+    # CLOUD STORAGE
     # =================================================
 
     upload_artifacts_to_s3 = PythonOperator(
@@ -223,18 +227,33 @@ with DAG(
     # PIPELINE FLOW
     # =================================================
 
+    # Database must exist before archive checking.
     create_database_task >> pipeline_check
 
+    # -------------------------------------------------
+    # Recovery branch
+    # -------------------------------------------------
+
     pipeline_check >> run_all_recovery
-    pipeline_check >> run_database_recovery
     pipeline_check >> skip_recovery
 
     run_all_recovery >> recovery_complete
-    run_database_recovery >> recovery_complete
     skip_recovery >> recovery_complete
 
+    # -------------------------------------------------
+    # Forecast -> Archive transition
+    #
+    # ALWAYS runs after recovery/skip and before W4.
+    # -------------------------------------------------
+
+    recovery_complete >> archive_forecast_transition
+
+    # -------------------------------------------------
+    # Main pipeline
+    # -------------------------------------------------
+
     (
-        recovery_complete
+        archive_forecast_transition
         >> run_w4_pipeline
         >> run_w5_pipeline
         >> run_w6_pipeline

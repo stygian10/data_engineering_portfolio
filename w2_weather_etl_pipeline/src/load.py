@@ -1,6 +1,6 @@
 import pandas as pd
 
-from config import PROCESSED_DIR, OUTPUT_FILE
+from src.config import PROCESSED_DIR, OUTPUT_FILE
 
 
 def load(df: pd.DataFrame) -> None:

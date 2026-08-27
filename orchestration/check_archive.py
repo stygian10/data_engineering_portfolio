@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 import subprocess
 import sys
 
@@ -14,8 +14,15 @@ from orchestration.config import (
     W1_DIR,
     W2_DIR,
     W3_DIR,
-    HISTORICAL_DATASET,
 )
+
+
+# =====================================================
+# ARCHIVE CONFIGURATION
+# =====================================================
+
+ARCHIVE_START_DATE = date(2025, 1, 1)
+ARCHIVE_SOURCE = "archive"
 
 
 # =====================================================
@@ -37,85 +44,131 @@ def get_connection():
 
 
 # =====================================================
-# DATASET CHECK
+# ARCHIVE DATE RANGE
 # =====================================================
 
-def dataset_exists():
+def get_archive_end_date():
     """
-    Check whether the Week 2 processed dataset exists.
+    Return yesterday's date.
+
+    The archive must contain all data from
+    ARCHIVE_START_DATE through yesterday.
     """
 
-    if not HISTORICAL_DATASET.exists():
-        return False
-
-    return any(HISTORICAL_DATASET.iterdir())
+    return datetime.utcnow().date() - timedelta(days=1)
 
 
 # =====================================================
-# HISTORICAL DATABASE CHECKS
+# ARCHIVE CHECK
 # =====================================================
 
-def historical_rows():
+def find_archive_gaps():
     """
-    Return the number of historical records.
+    Find missing archive dates for every city.
+
+    Expected archive:
+
+        ARCHIVE_START_DATE -> yesterday
+
+    A date is considered present when at least one
+    archive record exists for that city/date.
+
+    Returns
+    -------
+    list[tuple]
+        List of (city, missing_date) pairs.
     """
+
+    archive_end_date = get_archive_end_date()
 
     connection = get_connection()
     cursor = connection.cursor()
 
-    cursor.execute(
-        f"""
-        SELECT COUNT(*)
-        FROM {TABLE_NAME}
-        WHERE source = 'historical';
-        """
-    )
+    try:
 
-    count = cursor.fetchone()[0]
+        cursor.execute(
+            f"""
+            WITH expected_dates AS (
+                SELECT generate_series(
+                    %s::date,
+                    %s::date,
+                    INTERVAL '1 day'
+                )::date AS weather_date
+            ),
 
-    cursor.close()
-    connection.close()
+            cities AS (
+                SELECT DISTINCT city
+                FROM {TABLE_NAME}
+                WHERE source = %s
+            ),
 
-    return count
+            expected AS (
+                SELECT
+                    cities.city,
+                    expected_dates.weather_date
+                FROM cities
+                CROSS JOIN expected_dates
+            ),
+
+            actual AS (
+                SELECT DISTINCT
+                    city,
+                    time::date AS weather_date
+                FROM {TABLE_NAME}
+                WHERE source = %s
+                  AND time::date >= %s
+                  AND time::date <= %s
+            )
+
+            SELECT
+                expected.city,
+                expected.weather_date
+
+            FROM expected
+
+            LEFT JOIN actual
+                ON actual.city = expected.city
+               AND actual.weather_date = expected.weather_date
+
+            WHERE actual.weather_date IS NULL
+
+            ORDER BY
+                expected.city,
+                expected.weather_date;
+            """,
+            (
+                ARCHIVE_START_DATE,
+                archive_end_date,
+                ARCHIVE_SOURCE,
+                ARCHIVE_SOURCE,
+                ARCHIVE_START_DATE,
+                archive_end_date,
+            ),
+        )
+
+        return cursor.fetchall()
+
+    finally:
+
+        cursor.close()
+        connection.close()
 
 
-def latest_historical_date():
+# =====================================================
+# ARCHIVE STATUS
+# =====================================================
+
+def archive_is_complete():
     """
-    Return the latest historical weather timestamp.
+    Determine whether the complete archive exists.
     """
 
-    connection = get_connection()
-    cursor = connection.cursor()
+    gaps = find_archive_gaps()
 
-    cursor.execute(
-        f"""
-        SELECT MAX(time)
-        FROM {TABLE_NAME}
-        WHERE source = 'historical';
-        """
-    )
+    if gaps:
+        return False, gaps
 
-    latest = cursor.fetchone()[0]
-
-    cursor.close()
-    connection.close()
-
-    return latest
-
-
-def historical_up_to_date():
-    """
-    Determine whether historical data is current.
-    """
-
-    latest = latest_historical_date()
-
-    if latest is None:
-        return False
-
-    expected = datetime.utcnow().date() - timedelta(days=1)
-
-    return latest.date() >= expected
+    return True, []
 
 
 # =====================================================
@@ -175,39 +228,54 @@ def determine_pipeline_branch():
 
     print("\n========== PIPELINE CHECK ==========\n")
 
-    if not dataset_exists():
+    archive_end_date = get_archive_end_date()
 
-        print("Historical dataset : MISSING")
-        print("Branch             : run_w1_w2_w3")
+    print(
+        f"Expected archive : "
+        f"{ARCHIVE_START_DATE} -> {archive_end_date}"
+    )
+
+    print(
+        f"Archive source   : {ARCHIVE_SOURCE}"
+    )
+
+    gaps = find_archive_gaps()
+
+    if gaps:
+
+        print(
+            f"\nArchive gaps detected: {len(gaps)} city-days\n"
+        )
+
+        current_city = None
+
+        for city, missing_date in gaps:
+
+            if city != current_city:
+
+                print(f"{city}:")
+
+                current_city = city
+
+            print(f"  missing: {missing_date}")
+
+        print(
+            "\nArchive status    : INCOMPLETE"
+        )
+
+        print(
+            "Branch             : run_w1_w2_w3"
+        )
 
         return "run_w1_w2_w3"
 
-    print("Historical dataset : FOUND")
+    print(
+        "\nArchive status    : COMPLETE"
+    )
 
-    rows = historical_rows()
-
-    print(f"Historical rows    : {rows}")
-
-    if rows == 0:
-
-        print("Database history   : EMPTY")
-        print("Branch             : run_w3_only")
-
-        return "run_w3_only"
-
-    latest = latest_historical_date()
-
-    print(f"Latest historical  : {latest}")
-
-    if not historical_up_to_date():
-
-        print("Historical data    : OUTDATED")
-        print("Branch             : run_w1_w2_w3")
-
-        return "run_w1_w2_w3"
-
-    print("Historical data    : CURRENT")
-    print("Branch             : skip_recovery")
+    print(
+        "Branch             : skip_recovery"
+    )
 
     return "skip_recovery"
 
@@ -218,28 +286,133 @@ def determine_pipeline_branch():
 
 def run_w1_w2_w3():
     """
-    Execute Weeks 1–3 recovery.
+    Execute Weeks 1–3 archive recovery.
     """
 
     run_w1()
     run_w2()
-
-    # PostgreSQL table creation is handled by the DAG.
     run_w3()
 
 
 def run_w3_only():
     """
-    Execute Week 3 recovery only.
+    Execute Week 3 PostgreSQL loading only.
+
+    Kept for compatibility with the existing DAG.
     """
 
-    # PostgreSQL table creation is handled by the DAG.
     run_w3()
 
 
 def skip_recovery():
     """
-    Skip recovery.
+    Skip archive recovery.
     """
 
     print("\nRecovery skipped.\n")
+
+# =====================================================
+# FORECAST -> ARCHIVE TRANSITION
+# =====================================================
+
+def archive_expired_forecasts():
+    """
+    Reconcile forecast records whose date is before today.
+
+    Rules:
+        - Forecast records for today remain forecast.
+        - If an expired forecast has a matching archive record,
+          remove the forecast duplicate.
+        - If an expired forecast has no archive record,
+          convert it to archive.
+
+    Returns
+    -------
+    dict
+        Number of rows converted and duplicate forecast rows removed.
+    """
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+
+        # -------------------------------------------------
+        # 1. Convert expired forecast rows that do not
+        #    already have an archive counterpart.
+        # -------------------------------------------------
+
+        cursor.execute(
+            f"""
+            UPDATE {TABLE_NAME} AS forecast
+            SET source = %s
+            WHERE forecast.source = 'forecast'
+              AND forecast.time::date < CURRENT_DATE
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM {TABLE_NAME} AS archive
+                  WHERE archive.city = forecast.city
+                    AND archive.time = forecast.time
+                    AND archive.source = %s
+              );
+            """,
+            (
+                ARCHIVE_SOURCE,
+                ARCHIVE_SOURCE,
+            ),
+        )
+
+        converted_rows = cursor.rowcount
+
+        # -------------------------------------------------
+        # 2. Remove expired forecast rows where an archive
+        #    version already exists.
+        # -------------------------------------------------
+
+        cursor.execute(
+            f"""
+            DELETE FROM {TABLE_NAME} AS forecast
+            WHERE forecast.source = 'forecast'
+              AND forecast.time::date < CURRENT_DATE
+              AND EXISTS (
+                  SELECT 1
+                  FROM {TABLE_NAME} AS archive
+                  WHERE archive.city = forecast.city
+                    AND archive.time = forecast.time
+                    AND archive.source = %s
+              );
+            """,
+            (ARCHIVE_SOURCE,),
+        )
+
+        removed_duplicates = cursor.rowcount
+
+        connection.commit()
+
+        print("\n========== FORECAST TRANSITION ==========")
+        print(
+            f"Expired forecasts converted to archive : "
+            f"{converted_rows}"
+        )
+        print(
+            f"Duplicate expired forecasts removed    : "
+            f"{removed_duplicates}"
+        )
+        print(
+            "Today's forecast records               : preserved"
+        )
+
+        return {
+            "converted": converted_rows,
+            "removed_duplicates": removed_duplicates,
+        }
+
+    except Exception:
+
+        connection.rollback()
+        raise
+
+    finally:
+
+        cursor.close()
+        connection.close()

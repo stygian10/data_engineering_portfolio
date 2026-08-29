@@ -1,0 +1,6 @@
+.
+├── Folder_structure.txt
+├── P2-W2-D4.md
+└── P2-W2-D5.md
+
+1 directory, 3 files

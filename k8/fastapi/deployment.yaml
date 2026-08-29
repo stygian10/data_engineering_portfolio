@@ -24,7 +24,7 @@ spec:
         - name: download-s3-artifacts
 
           image: public.ecr.aws/aws-cli/aws-cli:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Never
 
           envFrom:
             - secretRef:

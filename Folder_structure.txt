@@ -2,6 +2,11 @@
 ├── Dockerfile
 ├── Folder_structure.txt
 ├── README.md
+├── airflow-custom.tar
+├── changelog_notes
+│   ├── Folder_structure.txt
+│   ├── P2-W2-D4.md
+│   └── P2-W2-D5.md
 ├── config
 ├── dags
 │   └── weather_etl_dag.py
@@ -11,15 +16,11 @@
 ├── k8
 │   ├── README.md
 │   ├── airflow
-│   │   ├── Dockerfile
 │   │   ├── README.md
 │   │   ├── airflow-init.yaml
 │   │   ├── api-server.yaml
 │   │   ├── dag-processor.yaml
 │   │   └── scheduler.yaml
-│   ├── config
-│   │   ├── configmap.yaml
-│   │   └── secret.yaml
 │   ├── dashboard
 │   │   ├── deployment.yaml
 │   │   └── service.yaml
@@ -35,7 +36,6 @@
 │   │   ├── pvc.yaml
 │   │   ├── service.yaml
 │   │   └── statefulset.yaml
-│   ├── namespace.yaml
 │   └── postgres
 │       ├── README.md
 │       ├── deploy_postgres.sh

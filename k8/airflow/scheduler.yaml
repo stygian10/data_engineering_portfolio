@@ -14,6 +14,7 @@ spec:
       labels:
         app: airflow-scheduler
     spec:
+      serviceAccountName: airflow-scheduler
       containers:
         - name: airflow-scheduler
           image: airflow-custom:latest
@@ -69,14 +70,14 @@ spec:
                 - /bin/bash
                 - -c
                 - airflow jobs check --job-type SchedulerJob --hostname "$HOSTNAME"
-            initialDelaySeconds: 60
-            periodSeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 3
+            initialDelaySeconds: 180
+            periodSeconds: 60
+            timeoutSeconds: 30
+            failureThreshold: 5
           resources:
             requests:
-              cpu: 500m
-              memory: 1Gi
+              cpu: 1000m
+              memory: 2Gi
             limits:
               cpu: "2"
               memory: 4Gi

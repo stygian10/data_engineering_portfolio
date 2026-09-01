@@ -126,14 +126,26 @@ spec:
               path: /
               port: 8000
             initialDelaySeconds: 5
+            timeoutSeconds: 1
             periodSeconds: 10
+            failureThreshold: 3
 
           livenessProbe:
             httpGet:
               path: /
               port: 8000
-            initialDelaySeconds: 15
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
             periodSeconds: 20
+            failureThreshold: 3
+
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 700m
+              memory: 1Gi
 
       volumes:
 

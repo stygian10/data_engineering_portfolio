@@ -72,6 +72,53 @@ def end_pipeline():
     print("============================================\n")
 
 
+def refresh_applications():
+    """
+    Restart FastAPI and Prediction Dashboard deployments
+    so their init containers download the latest S3 artifacts.
+    """
+
+    from datetime import datetime, timezone
+
+    from kubernetes import client, config
+
+    # Load Kubernetes credentials from inside the Airflow pod.
+    config.load_incluster_config()
+
+    apps = client.AppsV1Api()
+
+    deployments = [
+        "fastapi-deployment",
+        "prediction-dashboard-deployment",
+    ]
+
+    for deployment_name in deployments:
+        deployment = apps.read_namespaced_deployment(
+            name=deployment_name,
+            namespace="default",
+        )
+
+        annotations = (
+            deployment.spec.template.metadata.annotations or {}
+        )
+
+        annotations["kubectl.kubernetes.io/restartedAt"] = (
+            datetime.now(timezone.utc).isoformat()
+        )
+
+        deployment.spec.template.metadata.annotations = annotations
+
+        apps.patch_namespaced_deployment(
+            name=deployment_name,
+            namespace="default",
+            body=deployment,
+        )
+
+        print(
+            f"[REFRESH] Restart triggered: {deployment_name}"
+        )
+
+
 # =====================================================
 # DAG
 # =====================================================
@@ -215,6 +262,15 @@ with DAG(
     )
 
     # =================================================
+    # REFRESH APPLICATIONS
+    # =================================================
+
+    refresh_applications_task = PythonOperator(
+        task_id="refresh_applications",
+        python_callable=refresh_applications,
+    )
+
+    # =================================================
     # END PIPELINE
     # =================================================
 
@@ -262,5 +318,6 @@ with DAG(
         >> run_w9_pipeline
         >> upload_prediction_to_minio
         >> upload_artifacts_to_s3
+        >> refresh_applications_task
         >> end_task
     )

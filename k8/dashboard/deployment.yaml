@@ -130,14 +130,26 @@ spec:
               path: /
               port: 8051
             initialDelaySeconds: 10
+            timeoutSeconds: 1
             periodSeconds: 10
+            failureThreshold: 3
 
           livenessProbe:
             httpGet:
               path: /
               port: 8051
-            initialDelaySeconds: 20
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
             periodSeconds: 20
+            failureThreshold: 3
+
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
 
       volumes:
 

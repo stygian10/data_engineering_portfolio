@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: airflow-scheduler
+  namespace: default
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: airflow-application-refresh
+  namespace: default
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames:
+      - fastapi-deployment
+      - prediction-dashboard-deployment
+    verbs:
+      - get
+      - patch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: airflow-application-refresh
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: airflow-scheduler
+    namespace: default
+roleRef:
+  kind: Role
+  name: airflow-application-refresh
+  apiGroup: rbac.authorization.k8s.io

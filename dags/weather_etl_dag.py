@@ -128,6 +128,9 @@ with DAG(
     description="Weather Intelligence Platform",
     start_date=datetime(2026, 1, 1),
     schedule="@daily",
+    
+    max_active_runs=1,
+    max_active_tasks=1,
     catchup=False,
     default_args=default_args,
     tags=[

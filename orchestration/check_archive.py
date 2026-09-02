@@ -26,6 +26,26 @@ ARCHIVE_SOURCE = "archive"
 
 
 # =====================================================
+# EXPECTED CITIES
+# =====================================================
+
+# These cities are defined by the W1 project configuration.
+#
+# They are explicitly listed here because archive recovery
+# must work even when PostgreSQL contains zero archive rows.
+#
+# Previously, the archive checker derived the city list
+# from existing archive records. When the archive was empty,
+# that produced zero cities and therefore zero gaps.
+
+CITIES = [
+    "London",
+    "Manchester",
+    "Edinburgh",
+]
+
+
+# =====================================================
 # DATABASE
 # =====================================================
 
@@ -64,7 +84,7 @@ def get_archive_end_date():
 
 def find_archive_gaps():
     """
-    Find missing archive dates for every city.
+    Find missing archive dates for every configured city.
 
     Expected archive:
 
@@ -86,6 +106,24 @@ def find_archive_gaps():
 
     try:
 
+        # -------------------------------------------------
+        # Build the expected city list.
+        #
+        # This is deliberately independent of PostgreSQL.
+        #
+        # If there are zero archive records, the expected
+        # cities must still exist so missing archive dates
+        # can be detected.
+        # -------------------------------------------------
+
+        city_values = ", ".join(
+            cursor.mogrify(
+                "(%s)",
+                (city,),
+            ).decode()
+            for city in CITIES
+        )
+
         cursor.execute(
             f"""
             WITH expected_dates AS (
@@ -96,10 +134,8 @@ def find_archive_gaps():
                 )::date AS weather_date
             ),
 
-            cities AS (
-                SELECT DISTINCT city
-                FROM {TABLE_NAME}
-                WHERE source = %s
+            cities(city) AS (
+                VALUES {city_values}
             ),
 
             expected AS (
@@ -139,7 +175,6 @@ def find_archive_gaps():
             (
                 ARCHIVE_START_DATE,
                 archive_end_date,
-                ARCHIVE_SOURCE,
                 ARCHIVE_SOURCE,
                 ARCHIVE_START_DATE,
                 archive_end_date,
@@ -311,6 +346,7 @@ def skip_recovery():
 
     print("\nRecovery skipped.\n")
 
+
 # =====================================================
 # FORECAST -> ARCHIVE TRANSITION
 # =====================================================
@@ -390,14 +426,17 @@ def archive_expired_forecasts():
         connection.commit()
 
         print("\n========== FORECAST TRANSITION ==========")
+
         print(
             f"Expired forecasts converted to archive : "
             f"{converted_rows}"
         )
+
         print(
             f"Duplicate expired forecasts removed    : "
             f"{removed_duplicates}"
         )
+
         print(
             "Today's forecast records               : preserved"
         )

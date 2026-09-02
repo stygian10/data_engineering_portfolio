@@ -219,3 +219,4 @@ assets/.cache/
 *.snappy.parquet
 /w6_dashboard_minio/data
 /w5_spark_weather_etl/data
+.envAIRFLOW_ADMIN_USERNAME=admin

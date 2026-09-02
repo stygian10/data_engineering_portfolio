@@ -79,8 +79,14 @@ spec:
 
               airflow db migrate
 
-              echo "Creating Airflow admin user..."
+              echo "Creating Airflow admin user..."  
 
-              airflow users create                 --username admin                 --firstname admin                 --lastname user                 --role Admin                 --email admin@email.com                 --password admin || true
+              airflow users create \
+                --username "${AIRFLOW_ADMIN_USERNAME}" \
+                --firstname "Admin" \
+                --lastname "User" \
+                --role Admin \
+                --email "admin@weather-platform.local" \
+                --password "${AIRFLOW_ADMIN_PASSWORD}"
 
               echo "Airflow initialization completed."

@@ -2,11 +2,16 @@
 ├── Dockerfile
 ├── Folder_structure.txt
 ├── README.md
-├── airflow-custom.tar
 ├── changelog_notes
-│   ├── Folder_structure.txt
-│   ├── P2-W2-D4.md
-│   └── P2-W2-D5.md
+│   ├── P2-W2
+│   │   ├── P2-W2-D4.md
+│   │   └── P2-W2-D5.md
+│   └── P2-W3
+│       ├── P2-W3-D1.md
+│       ├── P2-W3-D2.md
+│       ├── P2-W3-D3.md
+│       ├── P2-W3-D4.md
+│       └── P2-W3-D5.md
 ├── config
 ├── dags
 │   └── weather_etl_dag.py
@@ -20,6 +25,7 @@
 │   │   ├── airflow-init.yaml
 │   │   ├── api-server.yaml
 │   │   ├── dag-processor.yaml
+│   │   ├── rbac.yaml
 │   │   └── scheduler.yaml
 │   ├── dashboard
 │   │   ├── deployment.yaml
@@ -27,9 +33,6 @@
 │   ├── fastapi
 │   │   ├── deployment.yaml
 │   │   └── service.yaml
-│   ├── learning
-│   │   ├── nginx-deployment.yaml
-│   │   └── nginx-pod.yaml
 │   ├── minio
 │   │   ├── README.md
 │   │   ├── deploy_minio.sh
@@ -219,4 +222,4 @@
 │       └── figures
 └── workflow.md
 
-70 directories, 150 files
+71 directories, 152 files

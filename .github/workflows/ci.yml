@@ -33,5 +33,8 @@ jobs:
           test -d dags
           test -d w10_fastapi_service
 
+      - name: Run limited tests
+        run: python -m unittest tests/test_project_imports.py
+
       - name: CI validation successful
-        run: echo "P2-W4-D1 CI validation passed"
+        run: echo "P2-W4-D2 validation passed"

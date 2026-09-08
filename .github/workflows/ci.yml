@@ -41,5 +41,8 @@ jobs:
       - name: Run limited tests
         run: python -m unittest tests/test_project_imports.py
 
+      - name: Build unified Docker image
+        run: docker build -t weather-platform:ci .
+
       - name: CI validation successful
         run: echo "P2-W4-D2 validation passed"

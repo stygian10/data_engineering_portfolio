@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy Dashboard to Oracle K3s
+      - name: Deploy application workloads to Oracle K3s
         env:
           ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
           ORACLE_USER: ${{ secrets.ORACLE_USER }}
@@ -102,15 +102,30 @@ jobs:
             "
               set -e
 
-              sudo k3s kubectl set image \
-                deployment/prediction-dashboard-deployment \
-                prediction-dashboard=ghcr.io/gaurav-dwivedi-de/data_engineering_portfolio:${IMAGE_TAG}
+              IMAGE=ghcr.io/gaurav-dwivedi-de/data_engineering_portfolio:${IMAGE_TAG}
 
-              sudo k3s kubectl patch deployment \
-                prediction-dashboard-deployment \
-                -p '{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"prediction-dashboard\",\"imagePullPolicy\":\"IfNotPresent\"}]}}}}'
+              echo 'Deploying application image:'
+              echo \$IMAGE
 
-              sudo k3s kubectl rollout status \
-                deployment/prediction-dashboard-deployment \
-                --timeout=180s
+              deployments=(
+                'prediction-dashboard-deployment'
+                'fastapi-deployment'
+                'airflow-apiserver'
+                'airflow-scheduler'
+                'airflow-dag-processor'
+              )
+
+              for deployment in \${deployments[@]}; do
+                echo \"Updating \$deployment...\"
+
+                sudo k3s kubectl set image \
+                  deployment/\$deployment \
+                  \"\$(sudo k3s kubectl get deployment \$deployment -o jsonpath='{.spec.template.spec.containers[0].name}')=\$IMAGE\"
+
+                sudo k3s kubectl rollout status \
+                  deployment/\$deployment \
+                  --timeout=180s
+              done
+
+              echo 'All application deployments rolled out successfully.'
             "

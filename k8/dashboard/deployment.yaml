@@ -24,7 +24,7 @@ spec:
         - name: download-s3-artifacts
 
           image: public.ecr.aws/aws-cli/aws-cli:latest
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
 
           envFrom:
             - secretRef:
@@ -82,7 +82,7 @@ spec:
         - name: prediction-dashboard
 
           image: airflow-custom:latest
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
 
           workingDir: /opt/airflow/w10
 

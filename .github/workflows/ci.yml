@@ -83,7 +83,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to Oracle K3s
+      - name: Deploy Dashboard to Oracle K3s
         env:
           ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
           ORACLE_USER: ${{ secrets.ORACLE_USER }}
@@ -100,4 +100,18 @@ jobs:
             -i ~/.ssh/oracle_k3s_key \
             -o StrictHostKeyChecking=no \
             "$ORACLE_USER@$ORACLE_HOST" \
-            "echo 'Oracle SSH connection successful'"
+            "
+              set -e
+
+              sudo k3s kubectl set image \
+                deployment/prediction-dashboard-deployment \
+                prediction-dashboard=ghcr.io/gaurav-dwivedi-de/data_engineering_portfolio:${IMAGE_TAG}
+
+              sudo k3s kubectl patch deployment \
+                prediction-dashboard-deployment \
+                -p '{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"prediction-dashboard\",\"imagePullPolicy\":\"IfNotPresent\"}]}}}}'
+
+              sudo k3s kubectl rollout status \
+                deployment/prediction-dashboard-deployment \
+                --timeout=180s
+            "

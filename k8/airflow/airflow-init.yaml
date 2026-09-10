@@ -13,7 +13,7 @@ spec:
       containers:
         - name: airflow-init
           image: airflow-custom:latest
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
                 name: weather-env

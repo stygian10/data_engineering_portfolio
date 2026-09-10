@@ -87,6 +87,6 @@ spec:
                 --lastname "User" \
                 --role Admin \
                 --email "admin@weather-platform.local" \
-                --password "${AIRFLOW_ADMIN_PASSWORD}"
+                --password "${AIRFLOW_ADMIN_PASSWORD}" || true
 
               echo "Airflow initialization completed."

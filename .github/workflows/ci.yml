@@ -46,36 +46,35 @@ jobs:
       - name: Run limited tests
         run: python -m unittest tests/test_project_imports.py
 
-      - name: Build unified Docker image
-        run: docker build -t weather-platform:ci .
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
 
       - name: Log in to GitHub Container Registry
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Tag image with commit SHA
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          docker tag \
-            weather-platform:ci \
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
 
-      - name: Push versioned image to GHCR
+      - name: Build and push multi-platform image
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          docker push \
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
 
       - name: CI validation successful
-        run: echo "P2-W4-D3 CI validation completed successfully"
+        run: echo "P2-W4-D4 CI validation completed successfully"
 
       - name: Image publishing completed
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: echo "P2-W4-D3 container image published successfully"
+        run: echo "P2-W4 container image published successfully"
 
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

@@ -76,3 +76,28 @@ jobs:
       - name: Image publishing completed
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: echo "P2-W4-D3 container image published successfully"
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: ci
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Oracle K3s
+        env:
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+          ORACLE_USER: ${{ secrets.ORACLE_USER }}
+          ORACLE_SSH_KEY: ${{ secrets.ORACLE_SSH_KEY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          printf '%s\n' "$ORACLE_SSH_KEY" > ~/.ssh/oracle_k3s_key
+          chmod 600 ~/.ssh/oracle_k3s_key
+
+          ssh \
+            -i ~/.ssh/oracle_k3s_key \
+            -o StrictHostKeyChecking=no \
+            "$ORACLE_USER@$ORACLE_HOST" \
+            "echo 'Oracle SSH connection successful'"

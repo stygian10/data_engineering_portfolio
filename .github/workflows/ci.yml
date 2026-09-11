@@ -303,6 +303,9 @@ jobs:
                 \$REPO/k8/fastapi/deployment.yaml \
                 | sudo k3s kubectl apply -f -
 
+              sudo k3s kubectl apply \
+                -f \$REPO/k8/fastapi/service.yaml
+
               sudo k3s kubectl rollout status \
                 deployment/fastapi-deployment \
                 --timeout=180s
@@ -316,11 +319,14 @@ jobs:
               sed \"s|IMAGE_TAG|${IMAGE_TAG}|g\" \
                 \$REPO/k8/dashboard/deployment.yaml \
                 | sudo k3s kubectl apply -f -
+              
+              sudo k3s kubectl apply \
+                -f \$REPO/k8/dashboard/service.yaml
 
               sudo k3s kubectl rollout status \
                 deployment/prediction-dashboard-deployment \
                 --timeout=180s
-
+            
               echo 'Dashboard is ready.'
 
               echo '========================================'

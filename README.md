@@ -1,8 +1,8 @@
 # Weather Intelligence Platform
 
-An end-to-end data engineering and machine learning platform for processing weather data, orchestrating pipelines, generating ML-ready features, training prediction models, serving predictions through FastAPI, and presenting results through an interactive Dashboard.
+An end-to-end data engineering and machine learning platform for processing weather data, orchestrating the complete data pipeline, generating ML-ready features, training prediction models, serving predictions through FastAPI, and presenting results through an interactive Dashboard.
 
-The project started as a 12-week data engineering and ML build and has since been extended into a cloud-native platform using Docker, Kubernetes, Oracle Cloud, GitHub Actions, and GitHub Container Registry.
+The project began as a 12-week data engineering and ML build and has been extended into a cloud-native platform using Docker, Kubernetes, Oracle Cloud, GitHub Actions, and GitHub Container Registry.
 
 ---
 
@@ -30,30 +30,30 @@ The platform covers the complete data and machine learning lifecycle:
 - Automated deployment from GitHub to Oracle K3s
 - Persistent storage for PostgreSQL and MinIO
 
-The intended development workflow is:
+The platform is designed around the following development and deployment workflow:
 
 ```text
-Local change
-    ↓
-Test locally
-    ↓
+Local Change
+     ↓
+Local Testing
+     ↓
 GitHub Desktop
-    ↓
-Push to GitHub
-    ↓
+     ↓
+GitHub
+     ↓
 GitHub Actions
-    ↓
+     ↓
 Validation + Tests
-    ↓
+     ↓
 Multi-platform Docker Build
-    ↓
+     ↓
 GitHub Container Registry
-    ↓
+     ↓
 Oracle Cloud K3s
-    ↓
+     ↓
 Kubernetes Rollout
-    ↓
-Updated Application
+     ↓
+Updated Platform
 ```
 
 ---
@@ -62,80 +62,170 @@ Updated Application
 
 ## Data Engineering and ML Pipeline
 
-```text
-Weather Data
-     │
-     ▼
-W1 — Data Collection & Cleaning
-     │
-     ▼
-W2 — ETL Pipeline
-     │
-     ▼
-W3 — PostgreSQL
-     │
-     ▼
-W4 — Airflow Orchestration
-     │
-     ▼
-W5 — PySpark ETL
-     │
-     ▼
-W6 — MinIO / S3 Data Lake + Dashboard
-     │
-     ▼
-W7 — Feature Engineering
-     │
-     ▼
-W8 — Machine Learning Model
-     │
-     ▼
-W9 — Batch Prediction
-     │
-     ▼
-W10 — FastAPI + Dashboard Integration
-```
+Apache Airflow is the central orchestration layer for the W1-W10 pipeline. It coordinates the processing stages and the movement of data and artifacts between the processing, database, object-storage, machine-learning, and application components.
 
-## Production / Cloud Architecture
+PostgreSQL and MinIO are infrastructure services used by the pipeline. They are deployed and managed as Kubernetes workloads, while Airflow orchestrates the pipeline tasks that use those services.
 
 ```text
-Local Development
-        │
-        ▼
-GitHub Desktop
-        │
-        ▼
-GitHub
-        │
-        ▼
-GitHub Actions
-        │
-   ┌────┼───────────────┐
-   ▼    ▼               ▼
-Tests  Validation   Docker Build
-        │               │
-        └───────┬───────┘
-                ▼
-       Multi-platform Image
-          AMD64 + ARM64
-                │
-                ▼
-               GHCR
-                │
-                ▼
-        Oracle Cloud VM
-                │
-                ▼
-               K3s
-                │
-   ┌────────────┼────────────┐
-   ▼            ▼            ▼
-PostgreSQL    MinIO       Airflow
+                         WEATHER DATA
                               │
-                       ┌──────┴──────┐
-                       ▼             ▼
-                    FastAPI      Dashboard
+                              ▼
+                 ┌────────────────────────┐
+                 │ W1 — Data Collection & │
+                 │      Cleaning          │
+                 └───────────┬────────────┘
+                             ▼
+                 ┌────────────────────────┐
+                 │ W2 — ETL Pipeline      │
+                 └───────────┬────────────┘
+                             ▼
+                 ┌────────────────────────┐
+                 │ W3 — PostgreSQL Loader │
+                 └───────────┬────────────┘
+                             ▼
+                 ┌────────────────────────┐
+                 │ W4 — Airflow           │
+                 │      Orchestration     │
+                 └───────────┬────────────┘
+                             ▼
+                 ┌────────────────────────┐
+                 │ W5 — PySpark ETL       │
+                 └───────────┬────────────┘
+                             ▼
+                 ┌────────────────────────┐
+                 │ W6 — MinIO / S3        │
+                 │      + Dashboard Data  │
+                 └───────────┬────────────┘
+                             ▼
+                 ┌────────────────────────┐
+                 │ W7 — Feature           │
+                 │      Engineering       │
+                 │ (ML-ready features)    │
+                 └───────────┬────────────┘
+                             ▼
+                 ┌────────────────────────┐
+                 │ W8 — ML Model Training │
+                 └───────────┬────────────┘
+                             ▼
+                 ┌────────────────────────┐
+                 │ W9 — Batch Prediction  │
+                 └───────────┬────────────┘
+                             ▼
+                 ┌────────────────────────┐
+                 │ W10 — FastAPI +        │
+                 │       Dashboard        │
+                 └────────────────────────┘
 ```
+
+### Airflow's Role
+
+Airflow is not only responsible for the FastAPI and Dashboard layer.
+
+It acts as the **central workflow orchestrator** for the full W1-W10 processing pipeline.
+
+In simple terms:
+
+```text
+Airflow
+  │
+  ├── Coordinates data ingestion and cleaning
+  ├── Coordinates ETL processing
+  ├── Coordinates PostgreSQL loading
+  ├── Coordinates PySpark processing
+  ├── Coordinates object-storage operations
+  ├── Coordinates feature engineering
+  ├── Coordinates ML processing
+  ├── Coordinates batch prediction
+  └── Produces / prepares outputs consumed by
+      FastAPI and the Dashboard
+```
+
+PostgreSQL and MinIO themselves run as persistent Kubernetes services. Airflow coordinates the pipeline tasks that create, process, load, read, and publish the required data and artifacts.
+
+---
+
+# Production / Cloud Architecture
+
+Phase 2 adds a production engineering layer around the original W1-W10 platform.
+
+```text
+                    LOCAL DEVELOPMENT
+                           │
+                           ▼
+                    GitHub Desktop
+                           │
+                           ▼
+                         GitHub
+                           │
+                           ▼
+                    GitHub Actions
+                           │
+              ┌────────────┼────────────┐
+              ▼            ▼            ▼
+           Changes       Tests       Docker Build
+           Detection    + Validation
+              │            │            │
+              └────────────┼────────────┘
+                           ▼
+                 Multi-platform Image
+                    AMD64 + ARM64
+                           │
+                           ▼
+                          GHCR
+                           │
+                           ▼
+                  Oracle Cloud VM
+                           │
+                           ▼
+                          K3s
+                           │
+        ┌──────────────────┼──────────────────┐
+        │                  │                  │
+        ▼                  ▼                  ▼
+   PostgreSQL            MinIO             Airflow
+   Data Store          Object Store       Orchestrator
+        │                  │                  │
+        │                  │          ┌───────┴───────┐
+        │                  │          ▼               ▼
+        │                  │       FastAPI        Dashboard
+        │                  │
+        └──────────────────┴──────────────────────────┐
+                                                       │
+                                                       ▼
+                                           W1-W10 Pipeline
+                                           Orchestrated by
+                                               Airflow
+```
+
+### Infrastructure vs Orchestration
+
+The production architecture has two related but different responsibilities:
+
+**Kubernetes / K3s**
+
+- Runs PostgreSQL
+- Runs MinIO
+- Runs Airflow
+- Runs FastAPI
+- Runs Dashboard
+- Manages Pods, Services, Deployments and StatefulSets
+- Provides persistent volumes for PostgreSQL and MinIO
+
+**Apache Airflow**
+
+- Orchestrates the W1-W10 data and ML workflow
+- Coordinates pipeline tasks
+- Coordinates processing dependencies and execution order
+- Uses PostgreSQL and MinIO as platform services
+- Coordinates outputs that are eventually consumed by FastAPI and the Dashboard
+
+**GitHub Actions**
+
+- Validates changes
+- Runs tests
+- Builds the unified Docker image
+- Publishes the image to GHCR
+- Deploys updated workloads to Oracle K3s
 
 ---
 
@@ -144,9 +234,9 @@ PostgreSQL    MinIO       Airflow
 | Stage | Module | Description | Main Technology |
 |---|---|---|---|
 | W1 | Data Collection & Cleaning | Collect and clean historical weather data | Python / Pandas |
-| W2 | ETL Pipeline | Transform and prepare weather data | Python / Pandas |
+| W2 | ETL Pipeline | Transform and prepare weather data for downstream processing | Python / Pandas |
 | W3 | PostgreSQL Loader | Load structured weather data into PostgreSQL | PostgreSQL / Python |
-| W4 | Airflow Orchestration | Schedule and orchestrate the pipeline | Apache Airflow |
+| W4 | Airflow Orchestration | Orchestrate the complete W1-W10 pipeline | Apache Airflow |
 | W5 | Spark ETL | Process weather data using distributed processing | PySpark |
 | W6 | Data Lake + Dashboard | Store data/artifacts and provide visualisation | MinIO / S3 / Plotly Dash |
 | W7 | Feature Engineering | Transform weather data into ML-ready features | Pandas / PyArrow |
@@ -191,7 +281,7 @@ W5
 W6
 │
 ├── MinIO / S3-compatible storage
-├── Dashboard
+├── Dashboard data
 │
 ▼
 W7
@@ -221,7 +311,7 @@ W10
 
 # Machine Learning Pipeline
 
-Feature engineering prepares the weather data for machine learning by transforming the available data into useful model input variables.
+Feature engineering means transforming the processed weather data into useful input variables that can be consumed by the machine-learning model.
 
 ```text
 Weather Data
@@ -253,34 +343,41 @@ W10 — FastAPI
 Dashboard
 ```
 
+The trained model and prediction artifacts are integrated into the application layer so that predictions can be accessed through FastAPI and presented through the Dashboard.
+
 ---
 
 # Technology Stack
 
-### Data Engineering
+## Data Engineering
+
 - Python
 - Pandas
 - PostgreSQL
 - PySpark
 - Apache Airflow
 
-### Storage
+## Storage
+
 - PostgreSQL
 - MinIO
 - Amazon S3
 - Kubernetes Persistent Volumes
 
-### Machine Learning
+## Machine Learning
+
 - Scikit-learn
 - Joblib
 - PyArrow
 
-### Application
+## Application
+
 - FastAPI
 - Plotly Dash
 - Uvicorn
 
-### Infrastructure
+## Infrastructure
+
 - Docker
 - Docker Compose
 - Kubernetes
@@ -288,7 +385,8 @@ Dashboard
 - Oracle Cloud
 - Persistent Volumes / PVCs
 
-### CI/CD
+## CI/CD
+
 - GitHub
 - GitHub Actions
 - GitHub Container Registry (GHCR)
@@ -414,7 +512,18 @@ GitHub Actions
                     └── Dashboard
 ```
 
-The workflow detects changes in deployable project areas such as Kubernetes manifests, Airflow DAGs, orchestration code, dependencies, Docker configuration, tests, and W1-W10 application code.
+## Deployable Change Detection
+
+The workflow detects changes in project areas that require deployment, including:
+
+- Dockerfile
+- Dependency files
+- Docker Compose files
+- Kubernetes manifests
+- Airflow DAGs
+- Orchestration code
+- Tests
+- W1-W10 application code
 
 Documentation-only changes can therefore avoid an unnecessary application image build and deployment.
 
@@ -425,6 +534,8 @@ Images are published to GitHub Container Registry using the Git commit SHA:
 ```text
 ghcr.io/gaurav-dwivedi-de/data_engineering_portfolio:<commit-sha>
 ```
+
+Using the commit SHA provides an identifiable version for each deployment instead of relying on a mutable `latest` tag.
 
 The CI pipeline builds:
 
@@ -458,7 +569,7 @@ Normal deployments use Kubernetes `apply` operations and do not delete PostgreSQ
 
 # Persistent Storage
 
-PostgreSQL and MinIO use Kubernetes PersistentVolumeClaims:
+PostgreSQL and MinIO use Kubernetes PersistentVolumeClaims.
 
 ```text
 PostgreSQL
@@ -479,7 +590,7 @@ minio-data PVC
 Persistent Storage
 ```
 
-Application pods may be replaced during a deployment, while the persistent volumes remain in place.
+Application Pods may be replaced during a deployment while the persistent volumes remain in place.
 
 The normal CI/CD workflow does not delete these PVCs.
 
@@ -577,7 +688,7 @@ Normal local Git operations use GitHub Desktop:
 VS Code
    │
    ▼
-Local testing
+Local Testing
    │
    ▼
 GitHub Desktop
@@ -596,7 +707,7 @@ GitHub Actions
 Automated CI/CD
 ```
 
-GitHub Actions performs the automated validation, image publishing and deployment after a qualifying push.
+GitHub Actions performs automated validation, image publishing and deployment after a qualifying push.
 
 ---
 
@@ -656,18 +767,20 @@ GitHub
     ↓
 GitHub Actions
     ↓
-Tests + validation
+Tests + Validation
     ↓
-Docker image
+Docker Image
     ↓
 GHCR
     ↓
 Oracle Cloud K3s
     ↓
-Kubernetes rollout
+Kubernetes Rollout
 ```
 
 A real application change has been used to verify the automated GitHub-to-Oracle deployment path.
+
+Airflow has also been verified on Oracle, including successful execution of the weather pipeline.
 
 The remaining P2-W4 work is rollback and recovery validation using versioned container images.
 
@@ -700,8 +813,7 @@ Planned work:
 Planned work:
 
 - MLflow integration with W8/W9
-- Experiment tracking
-- Parameter and metric tracking
+- Experiment tracking (recording model runs, parameters and metrics)
 - Model artifact tracking
 - Model versioning and lifecycle management
 - Review of Spark, ML, Kubernetes, image, storage and dependency efficiency

@@ -81,7 +81,7 @@ spec:
 
         - name: prediction-dashboard
 
-          image: airflow-custom:latest
+          image: ghcr.io/gaurav-dwivedi-de/data_engineering_portfolio:IMAGE_TAG
           imagePullPolicy: IfNotPresent
 
           workingDir: /opt/airflow/w10

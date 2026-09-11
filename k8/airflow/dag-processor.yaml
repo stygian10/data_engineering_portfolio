@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: airflow-dag-processor
-          image: airflow-custom:latest
+          image: ghcr.io/gaurav-dwivedi-de/data_engineering_portfolio:IMAGE_TAG
           imagePullPolicy: IfNotPresent
           command:
             - airflow

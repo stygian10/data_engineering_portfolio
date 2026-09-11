@@ -6,12 +6,16 @@
 │   ├── P2-W2
 │   │   ├── P2-W2-D4.md
 │   │   └── P2-W2-D5.md
-│   └── P2-W3
-│       ├── P2-W3-D1.md
-│       ├── P2-W3-D2.md
-│       ├── P2-W3-D3.md
-│       ├── P2-W3-D4.md
-│       └── P2-W3-D5.md
+│   ├── P2-W3
+│   │   ├── P2-W3-D1.md
+│   │   ├── P2-W3-D2.md
+│   │   ├── P2-W3-D3.md
+│   │   ├── P2-W3-D4.md
+│   │   └── P2-W3-D5.md
+│   └── P2-W4
+│       ├── P2-W4-D1.md
+│       ├── P2-W4-D2.md
+│       └── P2-W4-D3.md
 ├── config
 ├── dags
 │   └── weather_etl_dag.py
@@ -19,7 +23,6 @@
 ├── docker-compose.yml
 ├── docker_requirements.txt
 ├── k8
-│   ├── README.md
 │   ├── airflow
 │   │   ├── README.md
 │   │   ├── airflow-init.yaml
@@ -56,6 +59,9 @@
 ├── requirements.txt
 ├── s3_test.txt
 ├── s3_test_downloaded.txt
+├── test_README.md
+├── tests
+│   └── test_project_imports.py
 ├── w10_fastapi_service
 │   ├── README.md
 │   ├── app
@@ -222,4 +228,4 @@
 │       └── figures
 └── workflow.md
 
-71 directories, 152 files
+73 directories, 156 files

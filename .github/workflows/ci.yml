@@ -38,7 +38,7 @@ jobs:
                 deploy=true
                 ;;
 
-              k8/*|dags/*|orchestration/*|config/*|tests/*)
+              k8/*|dags/*|orchestration/*|tests/*)
                 deploy=true
                 ;;
 
@@ -121,7 +121,6 @@ jobs:
           test -d k8/minio
           test -d orchestration
           test -d dags
-          test -d config
           test -d w10_fastapi_service
 
       - name: Run limited tests

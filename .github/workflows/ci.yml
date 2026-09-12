@@ -46,6 +46,10 @@ jobs:
                 deploy=true
                 ;;
 
+              # Test files: CI only, no deployment
+              tests/*)
+                ;;
+
               # Any Python source file anywhere in the repository
               *.py)
                 deploy=true

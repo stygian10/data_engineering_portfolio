@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.txt'
+      - '**/*.csv'
+      - '**/*.parquet'
+      - '**/*.png'
+      - '**/*.pkl'
 
   pull_request:
     branches:

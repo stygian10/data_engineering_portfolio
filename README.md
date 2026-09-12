@@ -406,12 +406,6 @@ The trained model and prediction artifacts are integrated into the application l
 - Amazon S3 (AWS S3)
 - Kubernetes Persistent Volumes
 
-### AWS
-
-- Amazon S3
-- AWS region: `eu-west-2`
-- Bucket: `weather-data-lake-mlops`
-
 
 ### AWS S3 Cloud Data and Artifact Layer
 

@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 2
 
@@ -30,57 +30,27 @@ jobs:
 
           while IFS= read -r file; do
             case "$file" in
+
+              # Docker / dependency configuration
               Dockerfile|docker_requirements.txt|requirements.txt)
                 deploy=true
                 ;;
 
+              # Docker Compose configuration
               docker-compose.yml|docker-compose.resolved.yml)
                 deploy=true
                 ;;
 
-              k8/*|dags/*|orchestration/*|tests/*)
+              # Kubernetes configuration
+              k8/*)
                 deploy=true
                 ;;
 
-              w1_weather_data_cleaner/*)
+              # Any Python source file anywhere in the repository
+              *.py)
                 deploy=true
                 ;;
 
-              w2_weather_etl_pipeline/*)
-                deploy=true
-                ;;
-
-              w3_postgresql_loader/*)
-                deploy=true
-                ;;
-
-              w4_airflow_weather_pipeline/*)
-                deploy=true
-                ;;
-
-              w5_spark_weather_etl/*)
-                deploy=true
-                ;;
-
-              w6_dashboard_minio/*)
-                deploy=true
-                ;;
-
-              w7_feature_engineering/*)
-                deploy=true
-                ;;
-
-              w8_weather_prediction_model/*)
-                deploy=true
-                ;;
-
-              w9_ml_pipeline/*)
-                deploy=true
-                ;;
-
-              w10_fastapi_service/*)
-                deploy=true
-                ;;
             esac
           done < <(git diff --name-only HEAD^ HEAD)
 

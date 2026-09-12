@@ -197,6 +197,45 @@ Phase 2 adds a production engineering layer around the original W1-W10 platform.
                                                Airflow
 ```
 
+
+### AWS S3 in the Production Data Flow
+
+The cloud deployment uses AWS S3 as the cloud-backed artifact layer between the Airflow-orchestrated data/ML pipeline and the application services.
+
+```text
+                    Oracle Cloud / K3s
+                           │
+                           ▼
+                      Apache Airflow
+                           │
+                    W1-W10 Pipeline
+                           │
+             ┌─────────────┴─────────────┐
+             │                           │
+             ▼                           ▼
+        PostgreSQL                  AWS S3
+        structured data            cloud artifacts
+                                         │
+                                         ├── W7 features
+                                         ├── W8 model
+                                         ├── scaler
+                                         ├── metrics
+                                         └── W9 predictions
+                                         │
+                                         ▼
+                              FastAPI / Dashboard
+```
+
+This creates a clear separation of responsibilities:
+
+- **PostgreSQL** — structured relational data storage.
+- **MinIO** — Kubernetes-hosted S3-compatible object storage used as part of the platform infrastructure.
+- **AWS S3** — cloud-backed storage for the current data/ML/application artifacts used by the deployed workflow.
+- **Apache Airflow** — orchestration layer responsible for coordinating processing and artifact publication.
+- **FastAPI / Dashboard** — application layer consuming the current artifacts from S3.
+
+The AWS S3 integration is also retained as the storage foundation for the planned P2-W6 model artifact tracking and lifecycle-management work.
+
 ### Infrastructure vs Orchestration
 
 The production architecture has two related but different responsibilities:
@@ -249,6 +288,9 @@ The production architecture has two related but different responsibilities:
 | P2-W4 | CI/CD | Automate validation, image publishing and deployment | GitHub Actions / GHCR |
 
 ---
+
+
+Airflow is the control plane for this data/artifact movement. The application layer retrieves the latest S3 artifacts after the pipeline refreshes the deployed services.
 
 # W1-W10 Data Flow
 
@@ -361,8 +403,80 @@ The trained model and prediction artifacts are integrated into the application l
 
 - PostgreSQL
 - MinIO
-- Amazon S3
+- Amazon S3 (AWS S3)
 - Kubernetes Persistent Volumes
+
+### AWS
+
+- Amazon S3
+- AWS region: `eu-west-2`
+- Bucket: `weather-data-lake-mlops`
+
+
+### AWS S3 Cloud Data and Artifact Layer
+
+AWS S3 is an active cloud object-storage layer in the deployed W1-W10 data and machine-learning workflow. It is used by the orchestration layer to persist processed datasets and ML/application artifacts that are consumed by downstream services.
+
+The project uses:
+
+```text
+AWS S3 Bucket: weather-data-lake-mlops
+AWS Region: eu-west-2
+```
+
+The validated artifact flow is:
+
+```text
+W1-W10 Pipeline
+      │
+      ▼
+Apache Airflow
+      │
+      ▼
+AWS S3
+      ├── features/w7_features_final.parquet
+      ├── models/best_model.pkl
+      ├── models/scaler.pkl
+      ├── models/model_metrics.json
+      └── predictions/weather_predictions.csv
+      │
+      ▼
+FastAPI / Dashboard
+```
+
+The orchestration package contains the cloud-storage integration used for S3 operations:
+
+```text
+orchestration/
+├── cloud_storage.py
+└── test_cloud_storage.py
+```
+
+Airflow coordinates the W1-W10 processing lifecycle and uploads the resulting feature, model, prediction, and metrics artifacts to S3. The deployed FastAPI and Dashboard workloads then retrieve the current artifacts from S3.
+
+For Kubernetes deployment, the FastAPI and Dashboard workloads use AWS CLI-based init containers together with the `weather-env` Kubernetes Secret to download the required S3 artifacts before the application starts.
+
+When a new pipeline execution produces updated artifacts, the Airflow lifecycle refreshes the application Pods. The replacement Pods download the latest S3 artifacts, preventing the application layer from continuing to use stale feature, model, prediction, or metrics files.
+
+This establishes the deployed data/artifact lifecycle as:
+
+```text
+Airflow
+   ↓
+W1-W10 Pipeline
+   ↓
+AWS S3
+   ↓
+Application Refresh
+   ↓
+FastAPI / Dashboard Pods replaced
+   ↓
+Latest S3 artifacts downloaded
+   ↓
+Updated prediction application
+```
+
+AWS S3 is therefore part of the production cloud architecture rather than a separate storage experiment.
 
 ## Machine Learning
 
@@ -383,6 +497,7 @@ The trained model and prediction artifacts are integrated into the application l
 - Kubernetes
 - K3s
 - Oracle Cloud
+- AWS S3
 - Persistent Volumes / PVCs
 
 ## CI/CD
